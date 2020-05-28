@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="canonical" href="http://www.bootstraptoggle.com">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/github.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="bootstrap-toggle-master/css/bootstrap-toggle.css" rel="stylesheet">
+    <link href="bootstrap-toggle-master/doc/stylesheet.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <title> Güneş Kuyumculuk Doviz Uygulaması {% block title %}{% endblock %}</title>
+</head>
+
+<body>
+<div class="container">
+
+    <p class="container" id="navigationbar">
+        <a class="btn btn-primary" href="{{ url_for('home_page') }}" target="_blank"
+           rel="noopener noreferrer"
+           role="button">Ana Sayfa
+        </a>
+
+        <a class="btn btn-primary" href="{{ url_for('show_enduser_kurlar') }}" target="_blank"
+           rel="noopener noreferrer"
+           role="button">Kurlar
+        </a>
+
+        <a class="btn btn-primary" href="{{ url_for('show_enduser_sarrafiye') }}" target="_blank"
+           rel="noopener noreferrer"
+           role="button">Sarrafiye
+        </a>
+    </p>
+
+</div>
+
+<form class="form-group-lg" id="loggingform" name="logginform" role="form"
+      action="{{ url_for('logout', username=data.username) }}" method="post">
+    <button type="submit" class="btn btn-primary bottom-right" id="submitBtn">
+        Oturumu Kapat
+    </button>
+</form>
+
+<div class="container my-4" id="moneyshown">
+    <p> Para Gösterimi - {{ data.tarih }}</p>
+    <form class="form-horizontal form-group-lg" role="form" method="get">
+        {% if data.moneyshown %}
+            <table class="table" border="1">
+                <thead>
+                <tr>
+                    <th scope="col">Para Birimi</th>
+                    <th scope="col">Satış</th>
+                    <th scope="col">Alış</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for moneyrow in data.moneyshown %}
+                    <tr>
+                        <td>{{ moneyrow.title }}</td>
+                        <td>{{ moneyrow.satis }}</td>
+                        <td>{{ moneyrow.alis }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        {% endif %}
+    </form>
+</div>
+
+<hr>
+
+<div class="container my-4" id="sarrafiyeshown">
+    <p> Sarrafiye Gösterimi {{ data.tarih }}</p>
+    <form class="form-horizontal form-group-lg" role="form" method="get">
+        {% if data.sarrafiyeshown %}
+            <table class="table" border="1">
+                <thead>
+                <tr>
+                    <th scope="col">Para Birimi</th>
+                    <th scope="col">Satış</th>
+                    <th scope="col">Alış</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for zil in data.sarrafiyeshown %}
+                    <tr>
+                        <td>{{ zil.title }}</td>
+                        <td>{{ zil.satis }}</td>
+                        <td>{{ zil.alis }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        {% endif %}
+    </form>
+</div>
+
+<hr>
+
+<div class="container my-4" id="sarrafiyeadmin">
+    <h3> Sarrafiye </h3>
+    <form class="form-horizontal form-group" id="sarrafiyeform" name="sarrafiyeform" role="form"
+          action="{{ url_for('admin_page') }}" method="post">
+        <input type="hidden" name="username" value={{ data.username }}>
+        <br/>
+        {% if data.sarrafiyeadmin %}
+            {% for zil in data.sarrafiyeadmin %}
+                <div class="form-group form-inline">
+
+                    {% if zil.state == True %}
+                        <label class="label label-md label-warning" id="checkform">
+                            <input type="checkbox" class="form-check-input" name={{ zil.title }} id={{ zil.title }}
+                                   step="any" checked value="on" style="vertical-align: middle; margin-left: 10px;">
+                            {{ zil.title }}
+                        </label>
+
+                    {% elif zil.state == False %}
+                        <label class="label label-md label-warning" id="checkform">
+                            <input type="checkbox" class="form-check-input" name={{ zil.title }} id={{ zil.title }}
+                                   step="any" value="on" style="vertical-align: middle; margin-left: 10px">
+                            {{ zil.title }}
+                        </label>
+                    {% endif %}
+
+                    {% if zil.artis %}
+                        <div class="col" id="artiscol">
+                            <input type="number" name=artis?{{ zil.title }} class="form-control" id="sarrafiyeform"
+                                   placeholder="Artış değerini giriniz" step="any" value={{ zil.artis }}>
+                        </div>
+
+                    {% else %}
+                        <div class="col" id="artiscol">
+                            <input type="number" name=artis?{{ zil.title }} class="form-control" id="sarrafiyeform"
+                                   placeholder="Artış değerini giriniz" step="any">
+                        </div>
+                    {% endif %}
+
+                    {% if zil.azalis %}
+                        <div class="col" id="azalisform">
+                            <input type="number" name=azalis?{{ zil.title }} class="form-control" id="sarrafiyeform"
+                                   placeholder="Azalış değerini giriniz" step="any" value={{ zil.azalis }}>
+                        </div>
+                    {% else %}
+                        <div class="col" id="azalisform">
+                            <input type="number" name=azalis?{{ zil.title }} class="form-control" id="sarrafiyeform"
+                                   placeholder="Azalış değerini giriniz" step="any">
+                        </div>
+                    {% endif %}
+
+                </div>
+            {% endfor %}
+            <button type="submit" name="sarrafiyeadminform" class="btn btn-primary bottom-right" id="submitBtn">
+                Sarrafiye Verilerini Guncelle
+            </button>
+        {% endif %}
+    </form>
+</div>
+
+<hr>
+
+<div class="container my-4" id="moneyadmin">
+    <h3> Döviz Kurları </h3>
+    <form class="form-horizontal form-group-lg" id="moneyform" name="admin" role="form"
+          action="{{ url_for('admin_page') }}" method="post">
+        <input type="hidden" name="username" value={{ data.username }}>
+        {% if data.moneyadmin %}
+            {% for moneyrow in data.moneyadmin %}
+
+                <div class="form-group form-inline">
+
+                    {% if moneyrow.state == True %}
+                        <label class="label label-md label-warning" id="checkform">
+                            <input type="checkbox" class="form-check-input"
+                                   name={{ moneyrow.title }} id={{ moneyrow.title }}
+                                   step="any" checked value="on">
+                            {{ moneyrow.title }}
+                        </label>
+
+                    {% elif moneyrow.state == False %}
+                        <label class="label label-md label-warning" id="checkform">
+                            <input type="checkbox" class="form-check-input"
+                                   name={{ moneyrow.title }} id={{ moneyrow.title }}
+                                   step="any" value="on">
+                            {{ moneyrow.title }}
+                        </label>
+                    {% endif %}
+
+                    {% if moneyrow.artis %}
+                        <div class="col" id="artiscol">
+                            <input type="number" name=artis?{{ moneyrow.title }} class="form-control"
+                                   id="moneyform"
+                                   placeholder="Artış değerini giriniz" step="any" value={{ moneyrow.artis }}>
+                        </div>
+
+                    {% else %}
+                        <div class="col" id="artiscol">
+                            <input type="number" name=artis?{{ moneyrow.title }} class="form-control"
+                                   id="moneyform"
+                                   placeholder="Artış değerini giriniz" step="any">
+                        </div>
+                    {% endif %}
+
+                    {% if moneyrow.azalis %}
+                        <div class="col" id="azalisform">
+                            <input type="number" name=azalis?{{ moneyrow.title }} class="form-control"
+                                   id="moneyform"
+                                   placeholder="Azalış değerini giriniz" step="any" value={{ moneyrow.azalis }}>
+                        </div>
+                    {% else %}
+                        <div class="col" id="azalisform">
+                            <input type="number" name=azalis?{{ moneyrow.title }} class="form-control"
+                                   id="moneyform"
+                                   placeholder="Azalış değerini giriniz" step="any">
+                        </div>
+                    {% endif %}
+
+                </div>
+            {% endfor %}
+            <button type="submit" name="moneyadminform" class="btn btn-primary bottom-right" id="submitBtn">
+                Kur Verilerini Guncelle
+            </button>
+        {% endif %}
+
+
+        <script language="JavaScript" type="text/javascript">
+
+        </script>
+    </form>
+</div>
+</body>
+
+<style>
+    .table.table-condensed tr th {
+        border-bottom: 2px solid #f00; /* Change the color you want to set */
+    }
+
+
+    .table.table-condensed tr td {
+        border-bottom: 1px solid yellow; /* Change the color you want to set */
+    }
+
+    .block:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        margin-right: -0.25em; /* Adjusts for spacing */
+    }
+
+    #navigationbar {
+        margin-top: 50px;
+        margin-left: -12px;
+        font-size: 25px;
+    }
+
+    .btn-primary {
+        border-color: #f59920;
+        background-color: #f59920;
+    }
+
+    .label {
+        min-width: 200px !important;
+        display: inline-block !important;
+        font-size: 15px;
+        margin-left: 20px;
+        background-color: #ffda4a;
+    }
+
+    #loggingform {
+        position: absolute;
+        top: 50px;
+        right: 20px;
+    }
+
+</style>

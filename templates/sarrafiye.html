@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container my-4" id="shown">
+        <form class="form-horizontal form-group-lg" role="form" method="get">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Sarrafiye</th>
+                        <th scope="col">Satış</th>
+                        <th scope="col">Alış</th>
+                        <th scope="col">{{ tarih }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in data %}
+                        <tr>
+                            <td>{{ row.title }}</td>
+                            <td>{{ row.satis }}</td>
+                            <td>{{ row.alis }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+        </form>
+    </div>
+{% endblock %}
