@@ -2,9 +2,12 @@
 It will authenticate with on premise server via sql alchemy connecting database
 and get a query result
 """
+import os
 import warnings
-from auth.dbconnector import DBConnector
-from auth.config_reader import ConfiguresReader
+from pathlib import Path
+
+from dovizapp.auth.dbconnector import DBConnector
+from dovizapp.auth.config_reader import ConfiguresReader
 
 
 class Singleton(type):
@@ -32,7 +35,10 @@ class Auth(metaclass=Singleton):
     def raise_error_off(cls):
         cls.raise_error = False
 
-    def __init__(self, dbconfig):
+    def __init__(self, dbconfig=None):
+        if dbconfig is None:
+            dbconfig = os.path.join(Path(__file__).parent, "pull_data", "config.ini")
+
         self._dbconfigpath = dbconfig
 
         self._dbconfig = ConfiguresReader(dbconfig)

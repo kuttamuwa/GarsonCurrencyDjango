@@ -1,5 +1,4 @@
-from unittest import TestCase
-from auth.auth_onpremise import Auth
+from dovizapp.auth.auth_onpremise import Auth
 
 
 # class TestAuth(TestCase):

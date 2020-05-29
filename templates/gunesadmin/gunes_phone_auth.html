@@ -36,7 +36,7 @@
             padding: 10px;
             text-align: center;
             position: absolute;
-            bottom: 0px;
+            bottom: 0;
             color: #333;
         }
 
@@ -70,18 +70,15 @@
 
                     <h4>Telefona gelen doğrulama kodunu giriniz</h4>
                     <form action="" method="post" novalidate>
-                        <div class="form-group" hidden>
-
-                            {{ form.username(size=25) }}
-
-                        </div>
+                        {% csrf_token %}
                         <div class="form-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            {{ form.phone_sms_code }}
 
-                            {{ form.phone_sms_code(size=25) }}
                         </div>
 
                         <div class="form-group" title="Oturum aç" lang="tr">
-                            {{ form.submit() }}
+                            <button type="submit">Oturum Aç</button>
                         </div>
 
                     </form>
@@ -109,10 +106,10 @@
                 </ol>
                 <div class="carousel-inner" role="listbox">
                     <!-- Slide One - Set the background image for this slide in the line below -->
-                    <div class="carousel-item active" style="background-image: url('../static/gunesadmin/1.jpg')">
+                    <div class="carousel-item active"
+                         style="background-image: url('../static/gunesadmin/1.jpg')">
 
                     </div>
-
 
                 </div>
 

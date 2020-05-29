@@ -16,19 +16,18 @@
 
 <body>
 <div class="container">
-
     <p class="container" id="navigationbar">
-        <a class="btn btn-primary" href="{{ url_for('home_page') }}" target="_blank"
+        <a class="btn btn-primary" href="/homepage" target="_blank"
            rel="noopener noreferrer"
            role="button">Ana Sayfa
         </a>
 
-        <a class="btn btn-primary" href="{{ url_for('show_enduser_kurlar') }}" target="_blank"
+        <a class="btn btn-primary" href="/kurlar" target="_blank"
            rel="noopener noreferrer"
            role="button">Kurlar
         </a>
 
-        <a class="btn btn-primary" href="{{ url_for('show_enduser_sarrafiye') }}" target="_blank"
+        <a class="btn btn-primary" href="/sarrafiye" target="_blank"
            rel="noopener noreferrer"
            role="button">Sarrafiye
         </a>
@@ -37,16 +36,16 @@
 </div>
 
 <form class="form-group-lg" id="loggingform" name="logginform" role="form"
-      action="{{ url_for('logout', username=data.username) }}" method="post">
+      action="{% url 'logout' username %}" method="post">
     <button type="submit" class="btn btn-primary bottom-right" id="submitBtn">
         Oturumu Kapat
     </button>
 </form>
 
 <div class="container my-4" id="moneyshown">
-    <p> Para Gösterimi - {{ data.tarih }}</p>
+    <p> Para Gösterimi - {{ tarih }}</p>
     <form class="form-horizontal form-group-lg" role="form" method="get">
-        {% if data.moneyshown %}
+        {% if moneyshown %}
             <table class="table" border="1">
                 <thead>
                 <tr>
@@ -56,7 +55,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for moneyrow in data.moneyshown %}
+                {% for moneyrow in moneyshown %}
                     <tr>
                         <td>{{ moneyrow.title }}</td>
                         <td>{{ moneyrow.satis }}</td>
@@ -73,9 +72,9 @@
 <hr>
 
 <div class="container my-4" id="sarrafiyeshown">
-    <p> Sarrafiye Gösterimi {{ data.tarih }}</p>
+    <p> Sarrafiye Gösterimi {{ tarih }}</p>
     <form class="form-horizontal form-group-lg" role="form" method="get">
-        {% if data.sarrafiyeshown %}
+        {% if sarrafiyeshown %}
             <table class="table" border="1">
                 <thead>
                 <tr>
@@ -85,7 +84,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for zil in data.sarrafiyeshown %}
+                {% for zil in sarrafiyeshown %}
                     <tr>
                         <td>{{ zil.title }}</td>
                         <td>{{ zil.satis }}</td>
@@ -104,11 +103,11 @@
 <div class="container my-4" id="sarrafiyeadmin">
     <h3> Sarrafiye </h3>
     <form class="form-horizontal form-group" id="sarrafiyeform" name="sarrafiyeform" role="form"
-          action="{{ url_for('admin_page') }}" method="post">
-        <input type="hidden" name="username" value={{ data.username }}>
+          action="{% url 'dovizadmin' %}" method="post">
+        <input type="hidden" name="username" value={{ username }}>
         <br/>
-        {% if data.sarrafiyeadmin %}
-            {% for zil in data.sarrafiyeadmin %}
+        {% if sarrafiyeadmin %}
+            {% for zil in sarrafiyeadmin %}
                 <div class="form-group form-inline">
 
                     {% if zil.state == True %}
@@ -165,10 +164,10 @@
 <div class="container my-4" id="moneyadmin">
     <h3> Döviz Kurları </h3>
     <form class="form-horizontal form-group-lg" id="moneyform" name="admin" role="form"
-          action="{{ url_for('admin_page') }}" method="post">
-        <input type="hidden" name="username" value={{ data.username }}>
-        {% if data.moneyadmin %}
-            {% for moneyrow in data.moneyadmin %}
+          action="{% url 'dovizadmin' %}" method="post">
+        <input type="hidden" name="username" value={{ username }}>
+        {% if moneyadmin %}
+            {% for moneyrow in moneyadmin %}
 
                 <div class="form-group form-inline">
 
