@@ -71,6 +71,8 @@
                     <h4>Telefona gelen doğrulama kodunu giriniz</h4>
                     <form action="" method="post" novalidate>
                         {% csrf_token %}
+
+                        <input type="hidden" value={{ form.username }}>
                         <div class="form-group">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                             {{ form.phone_sms_code }}

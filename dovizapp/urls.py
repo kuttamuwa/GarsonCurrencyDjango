@@ -11,10 +11,13 @@ urlpatterns = [
     path('mobilsarrafiye', views.show_mobil_sarrafiye, name='mobilsarrafiye'),
     path('mobilkurlar', views.show_mobil_kurlar, name='mobilkurlar'),
 
-    # buradan sonra login, logout vs
-    path('login', LoginView.as_view(template_name='gunesadmin/gunes_first_auth.html',
-                                    redirect_field_name='onepage.html')),
-    # path('logout/<str:username>/', views.logout, name='logout'),
-    path('dovizadmin', views.admin_page, name='dovizadmin'),
-    # path('girisyap', views.username_password_form, name='girisyap')
+    # login, logout vs
+    path('login', views.login_form, name='login'),
+    path('logout/<str:username>/', views.dovizadmin_logout, name='logout'),
+
+    # bizim admin panelimiz
+    path('dovizadmin', views.admin_page, name='dovizadmin')
+    # bir de django admin paneli var o da bizim kullanıcıları, admini
+    # filan etkiliyor
+
 ]

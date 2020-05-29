@@ -14,18 +14,10 @@ class UserPassLoginForm(forms.Form):
         widget=forms.PasswordInput()
     )
 
+    phone_sms_code = forms.CharField(
+        required=True,
+        label='Telefon doğrulama kodu',
+        widget=forms.PasswordInput()
+    )
 
-class PhoneLoginForm(forms.Form):
-    phone_sms_code = forms.IntegerField()
 
-
-def seperate_forms(form):
-    if form.is_valid():
-        if form.cleaned_data.get('username'):
-            return form, UserPassLoginForm
-
-        elif form.cleaned_data.get('phone_sms_code'):
-            return form, PhoneLoginForm
-
-        else:
-            raise ModuleNotFoundError("Hatali form gonderildi?")

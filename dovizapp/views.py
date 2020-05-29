@@ -1,21 +1,23 @@
 import random
 
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import user_passes_test, login_required
-from django.contrib.auth.views import LoginView
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template import RequestContext
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
 
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
-from dovizapp.auth.django_login_forms import UserPassLoginForm, PhoneLoginForm, seperate_forms
+from dovizapp.auth.django_login_forms import UserPassLoginForm
 from dovizapp.pull_data.get_and_save import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
 auth = Auth()
-# Session.objects.all().delete().   to clear session to reauth
 
+
+# Session.objects.all().delete().   to clear session to reauth
 def index(request):
     return render(request, 'other_pages/homepage.html')
 
@@ -74,13 +76,17 @@ def show_mobil_kurlar(request):
     return JsonResponse(data={'data': data, 'tarih': tarih})
 
 
-def username_password_form(request):
+def login_form(request):
     if request.method == "POST":
-        form = seperate_forms(request.POST)
+        if request.user.is_authenticated:
+            return redirect('/admin')
 
-        if isinstance(form, UserPassLoginForm):
-            # verify and redirect to phone step
-            username, password = form.cleaned_data.get('username'), form.cleaned_data.get('password')
+        form = UserPassLoginForm(request.POST)
+
+        # verify and redirect to phone step
+        username, password = form.cleaned_data.get('username'), form.cleaned_data.get('password')
+        if form.cleaned_data.get('phone_sms_code') is None:
+            # kullanıcı halen ilk formda
             verified = auth.verify_username_password(username, password)
             if verified:
                 phone_number = auth.get_phone_number_username(username)
@@ -88,15 +94,26 @@ def username_password_form(request):
                 sms_code = random.randint(10000, 99999)
                 AuthPhone.set_sifre(phone_number, sms_code)
                 # AuthPhone.send_msg(phone_number)
-                return render(request, 'gunesadmin/gunes_phone_auth.html', {'form': PhoneLoginForm},
+                return render(request, 'gunesadmin/gunes_phone_auth.html', {'form': UserPassLoginForm},
                               RequestContext(request))
+
             else:
-                return HttpResponse("Verilen kullanıcı adı ve şifre yanlıştır !")
+                return render(request, 'other_pages/wrong_password.html', RequestContext(request))
+        else:
+            # sifre yollanmis
+            phone_sms_code = form.cleaned_data.get('phone_sms_code')
+            sent_sms_code = AuthPhone.get_sifre(auth.get_phone_number_username(username))
+            if phone_sms_code == sent_sms_code:
+                user = authenticate(request, username=username, password=password)
+                if user is None:
+                    messages.error(request, 'Username OR password is incorrect')
+                else:
+                    login(request, user)
+                    messages.success(request, f"{username} giriş yapmıştır.")
+                    return redirect('dovizadmin')
 
-        elif isinstance(form, PhoneLoginForm):
-            if AuthPhone.get_sifre(form.get('username')) == form.get('phone_sms_code'):
-
-                return admin_page(request)
+            else:
+                return render(request, 'other_pages/wrong_sms_code.html', RequestContext(request))
 
     elif request.method == "GET":
         return render(request, 'gunesadmin/gunes_first_auth.html', {'form': UserPassLoginForm},
@@ -120,16 +137,12 @@ def show_enduser_kurlar(request):
     return render(request, 'kurlar.html', {'data': data, 'tarih': tarih})
 
 
-def logout(request, username):
+def dovizadmin_logout(request, username):
+    logout(request)
     print(f"{username} logged out")
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def test_admin_page(request):
-    return render(request, 'base.html')
-
-
-@login_required
+@login_required(login_url='/login')
 def admin_page(request):
     # money
     get_data = MoneyData()
