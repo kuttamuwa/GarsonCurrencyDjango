@@ -15,7 +15,7 @@ class UserPassLoginForm(forms.Form):
     )
 
     phone_sms_code = forms.CharField(
-        required=True,
+        required=False,
         label='Telefon doğrulama kodu',
         widget=forms.PasswordInput()
     )

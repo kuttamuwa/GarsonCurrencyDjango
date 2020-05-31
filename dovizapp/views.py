@@ -7,6 +7,9 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 
+from django.db.models import Model
+from dovizapp.models import DumanUser
+
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
@@ -107,48 +110,49 @@ def show_mobil_kurlar(request):
     return JsonResponse(data={'data': data, 'tarih': tarih})
 
 
-def login_form(request):
+def doviz_admin_login(request):
     if request.method == "POST":
-        # if request.user.is_authenticated:
-        #     return redirect('dovizadmin')
-
         form = UserPassLoginForm(request.POST)
 
-        # verify and redirect to phone step
-        username, password = form.cleaned_data.get('username'), form.cleaned_data.get('password')
-        if form.cleaned_data.get('phone_sms_code') is None:
-            # kullanıcı halen ilk formda
-            verified = auth.verify_username_password(username, password)
-            if verified:
-                phone_number = auth.get_phone_number_username(username)
-
-                sms_code = random.randint(10000, 99999)
-                AuthPhone.set_sifre(phone_number, sms_code)
-                # AuthPhone.send_msg(phone_number)
-                return render(request, 'authpages/gunes_phone_auth.html', {'form': UserPassLoginForm},
-                              RequestContext(request))
+        if form.is_valid():
+            if form.cleaned_data.get('phone_sms_code') is None:
+                # ilk formda, kullanıcı adı şifre istenecek
+                username = form.cleaned_data.get('username')
+                try:
+                    usr = DumanUser.objects.get(username=username)
+                    context = {'form': UserPassLoginForm}
+                    return render(request, 'authpages/gunes_phone_auth.html', context)
+                except DumanUser.DoesNotExist:
+                    return render(request, 'error_pages/doesnotexist_user.html')
 
             else:
-                return render(request, 'site_pages/wrong_password.html', RequestContext(request))
-        else:
-            # sifre yollanmis
-            phone_sms_code = form.cleaned_data.get('phone_sms_code')
-            sent_sms_code = AuthPhone.get_sifre(auth.get_phone_number_username(username))
-            if phone_sms_code == sent_sms_code:
-                user = authenticate(request, username=username, password=password)
-                if user is None:
-                    messages.error(request, 'Username OR password is incorrect')
+                # sifre yollanmis
+                phone_sms_code = form.cleaned_data.get('phone_sms_code')
+                try:
+                    usr = DumanUser.objects.get(username=username)
+                except DumanUser.DoesNotExist:
+                    return render(request, 'error_pages/doesnotexist_user.html')
+
+                if usr.is_admin:
+                    sent_sms_code = AuthPhone.get_sifre(usr.get_phone_number())
+                    if phone_sms_code == sent_sms_code:
+                        user = authenticate(request, username=username, password=password)
+                        if user is None:
+                            messages.error(request, 'Username OR password is incorrect')
+                        else:
+                            login(request, user)
+                            messages.success(request, f"{username} giriş yapmıştır.")
+                            return redirect('dovizadmin')
+
+                    else:
+                        return render(request, 'error_pages/wrong_sms_code.html',
+                                      RequestContext(request))
                 else:
-                    login(request, user)
-                    messages.success(request, f"{username} giriş yapmıştır.")
-                    return redirect('dovizadmin')
-
-            else:
-                return render(request, 'site_pages/wrong_sms_code.html', RequestContext(request))
+                    return render(request, 'error_pages/no_permission.html')
 
     elif request.method == "GET":
-        return render(request, 'authpages/gunes_first_auth.html', {'form': UserPassLoginForm},
-                      RequestContext(request))
+        context = {'form': UserPassLoginForm}
+        return render(request, 'authpages/gunes_first_auth.html', context)
 
 
 def show_enduser_kurlar(request):

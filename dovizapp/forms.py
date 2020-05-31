@@ -6,6 +6,6 @@ from dovizapp.models import DumanUser
 class DumanUserRegisterForm(UserCreationForm):
     class Meta:
         model = DumanUser
-        fields = ['username', 'password1', 'password2', 'phone_number', 'email', 'user_permissions']
+        fields = ['username', 'password1', 'password2', 'phone_number', 'email']
 
 

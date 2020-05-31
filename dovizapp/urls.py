@@ -12,10 +12,11 @@ urlpatterns = [
     path('mobilkurlar', views.show_mobil_kurlar, name='mobilkurlar'),
 
     # login, logout vs
-    # path('login', views.login_form, name='login'),
     path('logout/<str:username>/', views.dovizadmin_logout, name='logout'),
     path('register', views.register_alternative, name='register'),
-    path('login', views.login_form, name='login'),
+    path('dovizlogin', views.doviz_admin_login, name='dovizlogin'),
+    # aynisi
+    path('login', views.doviz_admin_login, name='login'),
 
     # bizim admin panelimiz
     path('dovizadmin', views.manage_data_view, name='dovizadmin')
