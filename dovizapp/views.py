@@ -7,7 +7,6 @@ from django.template import RequestContext
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
-
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
@@ -22,6 +21,7 @@ def index(request):
     return render(request, 'other_pages/homepage.html')
 
 
+@login_required(login_url='homepage')
 def about_page(request):
     return render(request, 'other_pages/about.html')
 
