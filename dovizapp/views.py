@@ -18,20 +18,20 @@ auth = Auth()
 
 # Session.objects.all().delete().   to clear session to reauth
 def index(request):
-    return render(request, 'other_pages/homepage.html')
+    return render(request, 'site_pages/homepage.html')
 
 
 @login_required(login_url='homepage')
 def about_page(request):
-    return render(request, 'other_pages/about.html')
+    return render(request, 'site_pages/about.html')
 
 
 def contact_page(request):
-    return render(request, 'other_pages/contact.html')
+    return render(request, 'site_pages/contact.html')
 
 
 def home_page(request):
-    return render(request, 'other_pages/homepage.html')
+    return render(request, 'site_pages/homepage.html')
 
 
 def show_enduser_sarrafiye(request):
@@ -42,7 +42,7 @@ def show_enduser_sarrafiye(request):
     # formatting currency
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
 
-    return render(request, 'sarrafiye.html', {'data': sarrafiye_data,
+    return render(request, 'show_pages/web/web_sarrafiye.html', {'data': sarrafiye_data,
                                               'tarih': SarrafiyeInfo.get_tarih()})
 
 
@@ -94,11 +94,11 @@ def login_form(request):
                 sms_code = random.randint(10000, 99999)
                 AuthPhone.set_sifre(phone_number, sms_code)
                 # AuthPhone.send_msg(phone_number)
-                return render(request, 'gunesadmin/gunes_phone_auth.html', {'form': UserPassLoginForm},
+                return render(request, 'authpages/gunes_phone_auth.html', {'form': UserPassLoginForm},
                               RequestContext(request))
 
             else:
-                return render(request, 'other_pages/wrong_password.html', RequestContext(request))
+                return render(request, 'site_pages/wrong_password.html', RequestContext(request))
         else:
             # sifre yollanmis
             phone_sms_code = form.cleaned_data.get('phone_sms_code')
@@ -113,10 +113,10 @@ def login_form(request):
                     return redirect('dovizadmin')
 
             else:
-                return render(request, 'other_pages/wrong_sms_code.html', RequestContext(request))
+                return render(request, 'site_pages/wrong_sms_code.html', RequestContext(request))
 
     elif request.method == "GET":
-        return render(request, 'gunesadmin/gunes_first_auth.html', {'form': UserPassLoginForm},
+        return render(request, 'authpages/gunes_first_auth.html', {'form': UserPassLoginForm},
                       RequestContext(request))
 
 
@@ -134,7 +134,7 @@ def show_enduser_kurlar(request):
     # formatting currency
     data = MoneyData.format_currency_data(data)
 
-    return render(request, 'kurlar.html', {'data': data, 'tarih': tarih})
+    return render(request, 'show_pages/web/web_kurlar.html', {'data': data, 'tarih': tarih})
 
 
 def dovizadmin_logout(request, username):
@@ -158,7 +158,7 @@ def admin_page(request):
     sarrafiye_data = SarrafiyeInfo.add_data_makas_value_info(sarrafiye_data)
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
 
-    return render(request, 'onepage.html', {
+    return render(request, 'data_managing_page.html', {
         'moneyshown': [i for i in money_data if i['title'] in MoneyData.get_para_birimleri_on()],
         'moneyadmin': money_data,
         'sarrafiyeshown': [i for i in sarrafiye_data if i['title'] in SarrafiyeInfo.get_on_represent_values()],
