@@ -1,15 +1,16 @@
 import random
 
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.http import JsonResponse, HttpResponse
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
+from dovizapp.forms import DumanUserRegisterForm
 from dovizapp.pull_data.get_and_save import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
@@ -21,7 +22,37 @@ def index(request):
     return render(request, 'site_pages/homepage.html')
 
 
-@login_required(login_url='homepage')
+def register_alternative(request):
+    form = DumanUserRegisterForm()
+    context = {"form": form}
+
+    if request.method == "POST":
+        form = DumanUserRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'{username} kullanıcısı başarıyla oluşturuldu !')
+            return redirect('login')
+
+    return render(request, 'admin_pages/register.html', context)
+
+
+def login_alternative(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dovizadmin')
+        else:
+            messages.info(request, "Kullanıcı adı veya şifre yanlış !")
+
+    context = {}
+    return render(request, 'admin_pages/login.html', context)
+
+
 def about_page(request):
     return render(request, 'site_pages/about.html')
 
@@ -43,7 +74,7 @@ def show_enduser_sarrafiye(request):
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
 
     return render(request, 'show_pages/web/web_sarrafiye.html', {'data': sarrafiye_data,
-                                              'tarih': SarrafiyeInfo.get_tarih()})
+                                                                 'tarih': SarrafiyeInfo.get_tarih()})
 
 
 def show_mobil_sarrafiye(request):
@@ -78,8 +109,8 @@ def show_mobil_kurlar(request):
 
 def login_form(request):
     if request.method == "POST":
-        if request.user.is_authenticated:
-            return redirect('/admin')
+        # if request.user.is_authenticated:
+        #     return redirect('dovizadmin')
 
         form = UserPassLoginForm(request.POST)
 
@@ -137,13 +168,12 @@ def show_enduser_kurlar(request):
     return render(request, 'show_pages/web/web_kurlar.html', {'data': data, 'tarih': tarih})
 
 
-def dovizadmin_logout(request, username):
+def dovizadmin_logout(request):
     logout(request)
-    print(f"{username} logged out")
 
 
-@login_required(login_url='/login')
-def admin_page(request):
+@login_required(login_url='login')
+def manage_data_view(request):
     # money
     get_data = MoneyData()
     money_data = get_data.runforme()
@@ -158,7 +188,7 @@ def admin_page(request):
     sarrafiye_data = SarrafiyeInfo.add_data_makas_value_info(sarrafiye_data)
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
 
-    return render(request, 'data_managing_page.html', {
+    return render(request, 'admin_pages/data_managing_page.html', {
         'moneyshown': [i for i in money_data if i['title'] in MoneyData.get_para_birimleri_on()],
         'moneyadmin': money_data,
         'sarrafiyeshown': [i for i in sarrafiye_data if i['title'] in SarrafiyeInfo.get_on_represent_values()],
