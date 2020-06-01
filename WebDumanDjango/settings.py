@@ -125,3 +125,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'dovizapp.DumanUser'
+
+SESSION_COOKIE_AGE = 600
