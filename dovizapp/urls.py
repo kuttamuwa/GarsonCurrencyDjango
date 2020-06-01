@@ -12,7 +12,7 @@ urlpatterns = [
     path('mobilkurlar', views.show_mobil_kurlar, name='mobilkurlar'),
 
     # login, logout vs
-    path('logout/<str:username>/', views.dovizadmin_logout, name='logout'),
+    path('logout', views.dovizadmin_logout, name='logout'),
     path('register', views.register_alternative, name='register'),
     path('dovizlogin', views.doviz_admin_login, name='dovizlogin'),
     # aynisi

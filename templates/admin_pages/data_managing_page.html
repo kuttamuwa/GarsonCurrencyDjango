@@ -37,6 +37,7 @@
 
 <form class="form-group-lg" id="loggingform" name="logginform" role="form"
       action="/logout" method="post">
+    {% csrf_token %}
     <button type="submit" class="btn btn-primary bottom-right" id="submitBtn">
         Oturumu Kapat
     </button>
@@ -45,6 +46,7 @@
 <div class="container my-4" id="moneyshown">
     <p> Para Gösterimi - {{ tarih }}</p>
     <form class="form-horizontal form-group-lg" role="form" method="get">
+        {% csrf_token %}
         {% if moneyshown %}
             <table class="table" border="1">
                 <thead>
@@ -104,7 +106,7 @@
     <h3> Sarrafiye </h3>
     <form class="form-horizontal form-group" id="sarrafiyeform" name="sarrafiyeform" role="form"
           action="{% url 'dovizadmin' %}" method="post">
-        <input type="hidden" name="username" value={{ username }}>
+        {% csrf_token %}
         <br/>
         {% if sarrafiyeadmin %}
             {% for zil in sarrafiyeadmin %}
@@ -165,7 +167,7 @@
     <h3> Döviz Kurları </h3>
     <form class="form-horizontal form-group-lg" id="moneyform" name="admin" role="form"
           action="{% url 'dovizadmin' %}" method="post">
-        <input type="hidden" name="username" value={{ username }}>
+        {% csrf_token %}
         {% if moneyadmin %}
             {% for moneyrow in moneyadmin %}
 

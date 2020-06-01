@@ -22,7 +22,7 @@ class AuthPhone:
         cls._phone_sifre[phone_number] = {'sifre': sifre, 'right': True, 'user': user}
 
     @classmethod
-    def reset_sifre(cls, phone_number):
+    def reset(cls, phone_number):
         cls._phone_sifre[phone_number] = None
 
     @staticmethod

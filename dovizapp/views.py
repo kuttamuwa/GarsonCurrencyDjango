@@ -3,13 +3,13 @@ import random
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
-from dovizapp.forms import DumanUserRegisterForm
+from dovizapp.forms import DumanUserRegisterForm, FormManager
 from dovizapp.models import DumanUser
 from dovizapp.pull_data.get_and_save import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
@@ -153,6 +153,7 @@ def doviz_admin_login(request):
                         stored_sms_code, duman_user = stored_sms_code
                         if stored_sms_code == sent_sms_code:
                             login(request, duman_user)
+                            AuthPhone.reset(phone_number)
                             return redirect('dovizadmin')
 
                     else:
@@ -188,15 +189,33 @@ def show_enduser_kurlar(request):
 
 def dovizadmin_logout(request):
     logout(request)
+    return redirect('homepage')
 
 
 @login_required(login_url='login')
 def manage_data_view(request):
+    if request.method == 'POST':
+        form_type = FormManager.return_form_one(request)
+        if form_type == 1:
+            # sarrafiyeadminform
+            FormManager.sarrafiye_admin_manage(request.POST)
+        elif form_type == 2:
+            # moneyadminform
+            FormManager.money_admin_manage(request.POST)
+
+    elif request.method == 'GET':
+        pass
+
+    return load_admin_page(request)
+
+
+def load_admin_page(request):
     # money
     get_data = MoneyData()
     money_data = get_data.runforme()
     money_data = MoneyData.add_data_state_info(money_data)
     money_data = MoneyData.add_data_makas_value_info(money_data)
+    money_data = get_data.order_money(money_data)
 
     # sarrafiye
     kgrtry_value = [i for i in money_data if i['title'] == "KGRTRY"][0]
