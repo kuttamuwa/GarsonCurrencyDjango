@@ -11,15 +11,19 @@ class AuthPhone:
 
     @classmethod
     def get_sifre(cls, phone_number):
-        return cls._phone_sifre[phone_number]
+        if cls._phone_sifre[phone_number]['right']:
+            obj = cls._phone_sifre[phone_number]
+            return obj['sifre'], obj['user']
+        else:
+            return None
 
     @classmethod
-    def set_sifre(cls, phone_number, sifre):
-        cls._phone_sifre[phone_number] = sifre
+    def set_sifre(cls, phone_number, sifre, user):
+        cls._phone_sifre[phone_number] = {'sifre': sifre, 'right': True, 'user': user}
 
     @classmethod
-    def reset_sifre(cls, username):
-        cls._phone_sifre[username] = None
+    def reset_sifre(cls, phone_number):
+        cls._phone_sifre[phone_number] = None
 
     @staticmethod
     def fix_phone_number(phone_number):
@@ -45,7 +49,7 @@ class AuthPhone:
 
     @classmethod
     def _create_send_msg(cls, phone_number):
-        sifre = cls.get_sifre(phone_number)
+        sifre = cls.get_sifre(phone_number)['sifre']
         msg = f"<sms><kno>1007268</kno><kulad>905323028251</kulad><sifre>568SYR</sifre><tur>Normal</tur><gonderen>" \
             f"AVIMAYDNLTM</gonderen><mesaj>Sizin kodunuz: {sifre}</mesaj><numaralar>{phone_number}</numaralar>" \
             f"<zaman>2020-01-14 10:56:00</zaman><zamanasimi>2020-01-14 11:56:00</zamanasimi></sms>"

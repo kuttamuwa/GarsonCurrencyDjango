@@ -8,7 +8,7 @@ class UserPassLoginForm(forms.Form):
         max_length=20
     )
     password = forms.CharField(
-        required=True,
+        required=False,
         label='Şifre',
         max_length=32,
         widget=forms.PasswordInput()

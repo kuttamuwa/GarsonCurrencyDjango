@@ -5,15 +5,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.template import RequestContext
-
-from django.db.models import Model
-from dovizapp.models import DumanUser
 
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
 from dovizapp.forms import DumanUserRegisterForm
+from dovizapp.models import DumanUser
 from dovizapp.pull_data.get_and_save import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
@@ -111,48 +108,65 @@ def show_mobil_kurlar(request):
 
 
 def doviz_admin_login(request):
-    if request.method == "POST":
+    if request.method == "GET":
+        # login sayfasi ilk açıldığında kullanıcı adı ve şifre girilir
+        context = {'form': UserPassLoginForm}
+        return render(request, 'authpages/gunes_first_auth.html', context)
+
+    elif request.method == "POST":
+        # form gönderilmiş, user-pwd mi yoksa tel kodu mu henüz bilmiyoruz
         form = UserPassLoginForm(request.POST)
 
         if form.is_valid():
-            if form.cleaned_data.get('phone_sms_code') is None:
-                # ilk formda, kullanıcı adı şifre istenecek
-                username = form.cleaned_data.get('username')
+            username = form.cleaned_data.get('username')
+
+            if form.cleaned_data.get('phone_sms_code') == "":
+                # kullanıcı adı şifre girilmiş şimdi telefon kodu yollayacağız
+                password = form.cleaned_data.get('password')
                 try:
-                    usr = DumanUser.objects.get(username=username)
-                    context = {'form': UserPassLoginForm}
-                    return render(request, 'authpages/gunes_phone_auth.html', context)
+                    duman_user = authenticate(request, username=username, password=password)
+                    if duman_user:
+                        context = {'form': form, 'username': username}
+
+                        # sms kodu yolla
+                        sms_code = random.randint(10000, 99999)
+                        phone_number = duman_user.get_phone_number()
+                        AuthPhone.set_sifre(phone_number, sms_code, duman_user)
+                        print(f"sms code : {sms_code}")
+                        # AuthPhone.send_msg(phone_number)
+
+                        return render(request, 'authpages/gunes_phone_auth.html', context)
+
+                    else:
+                        return render(request, 'error_pages/wrong_password.html')
+
                 except DumanUser.DoesNotExist:
                     return render(request, 'error_pages/doesnotexist_user.html')
 
             else:
-                # sifre yollanmis
-                phone_sms_code = form.cleaned_data.get('phone_sms_code')
                 try:
-                    usr = DumanUser.objects.get(username=username)
-                except DumanUser.DoesNotExist:
-                    return render(request, 'error_pages/doesnotexist_user.html')
-
-                if usr.is_admin:
-                    sent_sms_code = AuthPhone.get_sifre(usr.get_phone_number())
-                    if phone_sms_code == sent_sms_code:
-                        user = authenticate(request, username=username, password=password)
-                        if user is None:
-                            messages.error(request, 'Username OR password is incorrect')
-                        else:
-                            login(request, user)
-                            messages.success(request, f"{username} giriş yapmıştır.")
+                    # sms kodu doğrulama
+                    sent_sms_code = int(form.cleaned_data.get('phone_sms_code'))
+                    phone_number = DumanUser.objects.get(username=username).get_phone_number()
+                    stored_sms_code = AuthPhone.get_sifre(phone_number)
+                    if stored_sms_code:
+                        stored_sms_code, duman_user = stored_sms_code
+                        if stored_sms_code == sent_sms_code:
+                            login(request, duman_user)
                             return redirect('dovizadmin')
 
                     else:
-                        return render(request, 'error_pages/wrong_sms_code.html',
-                                      RequestContext(request))
-                else:
-                    return render(request, 'error_pages/no_permission.html')
+                        # demek ki username password kismi geçilmemiş bi şekilde direk kod denemesi yapilyor
+                        return render(request, 'error_pages/general_error.html',
+                                      {
+                                          'errors': 'Kullanıcı adı şifre girişi yapılmadan '
+                                                    'telefon kodu şifresi denemesi yapiliyor!'})
 
-    elif request.method == "GET":
-        context = {'form': UserPassLoginForm}
-        return render(request, 'authpages/gunes_first_auth.html', context)
+                except DumanUser.DoesNotExist:
+                    return render(request, 'error_pages/wrong_sms_code.html')
+
+        else:
+            return render(request, 'error_pages/general_error.html', context={'errors': form.errors})
 
 
 def show_enduser_kurlar(request):
