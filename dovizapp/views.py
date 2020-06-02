@@ -14,8 +14,6 @@ from dovizapp.models import DumanUser
 from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
-auth = Auth()
-
 
 # Session.objects.all().delete().   to clear session to reauth
 def index(request):

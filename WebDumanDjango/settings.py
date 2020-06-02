@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'WebDumanDjango.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'webdbdjango',
+        'NAME': 'webdb',
         'USER': 'postgres',
         'PASSWORD': 'NeDvEd.1190',
         'HOST': 'localhost',
