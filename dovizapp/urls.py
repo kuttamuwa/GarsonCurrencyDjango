@@ -19,8 +19,7 @@ urlpatterns = [
     path('login', views.doviz_admin_login, name='login'),
 
     # bizim admin panelimiz
-    path('dovizadmin', views.manage_data_view, name='dovizadmin')
+    path('dovizadmin', views.manage_data_view, name='dovizadmin'),
     # bir de django admin paneli var o da bizim kullanıcıları, admini
     # filan etkiliyor
-
 ]

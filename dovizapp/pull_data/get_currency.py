@@ -25,8 +25,8 @@ class MoneyData:
     @classmethod
     def format_currency_data(cls, data):
         for i in data:
-            i['alis'] = format(round(float(i['alis']), 4), ",")
-            i['satis'] = format(round(float(i['satis']), 4), ",")
+            i['alis'] = round(float(i['alis']), 4)
+            i['satis'] = round(float(i['satis']), 4)
 
         return data
 
@@ -202,7 +202,12 @@ class MoneyData:
         cls.set_para_birimleri_all(_dict)
 
     def istek_yap(self):
-        response = requests.get(self.url)
+        try:
+            response = requests.get(self.url)
+
+        except ConnectionError:
+            raise ConnectionError('Baglanti hatasi olustu. '
+                                  'Lutfen internet baglantinizi kontrol ediniz !')
         if response.status_code != 200:
             raise requests.RequestException("Istek basarili donmuyor ! \n"
                                             f"{response}")
@@ -223,16 +228,15 @@ class MoneyData:
                 alis_value = d[self.static_titles['alis']]
                 if str(alis_value).count(','):
                     alis_value = alis_value.replace(',', '.')
-                alis_value = float(alis_value) - float(
-                    f"0.{self.get_makas_value(d[self.static_titles['title']], 'azalis')}")
+
+                alis_value = float(alis_value) - float(self.get_makas_value(d[self.static_titles['title']], 'azalis'))
 
                 # satis
                 satis_value = d[self.static_titles['satis']]
                 if str(satis_value).count(','):
                     satis_value = satis_value.replace(',', '.')
 
-                satis_value = float(satis_value) + float(
-                    f"0.{self.get_makas_value(d[self.static_titles['title']], 'artis')}")
+                satis_value = float(satis_value) + float(self.get_makas_value(d[self.static_titles['title']], 'artis'))
 
                 d[self.static_titles['alis']] = alis_value
                 d[self.static_titles['satis']] = satis_value

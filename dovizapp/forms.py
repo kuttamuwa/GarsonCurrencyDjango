@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm
+from django import forms
 
 from dovizapp.models import DumanUser
-from dovizapp.pull_data.get_and_save import MoneyData
+from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
 
@@ -21,7 +22,6 @@ class FormManager:
 
     @staticmethod
     def return_form_one(request):
-        # todo : iki ayrı form tasarlanacak
         if [k for k, v in request.POST.items()].count('sarrafiyeadminform'):
             return FormManager.get_formtypes('sarrafiyeadminform')
 
@@ -38,14 +38,14 @@ class FormManager:
         # tum checkboxlari kapatmis gibi gosterecegiz, cunku formda sadece acik emri bulunanlar geliyor.
         SarrafiyeInfo.turn_off_all_represent_values()
 
-        for i in sarrafiye_form.items():
+        for row in sarrafiye_form.items():
 
-            if i not in ('sarrafiyeadminform', 'csrfmiddlewaretoken'):
-                key, value = i
+            if row not in ('sarrafiyeadminform', 'csrfmiddlewaretoken'):
+                key, value = row
                 if str(key).count('?'):
                     # artis azalis degerleri gelir
                     term, sarrafiye = key.split('?')
-                    if value != "":  # isaretlendi ama deger girilmemis olabilir?
+                    if value != "":
                         SarrafiyeInfo.set_makas_value(sarrafiye, value, term)
 
                 else:
@@ -62,16 +62,18 @@ class FormManager:
         MoneyData.set_para_birimleri_turn_off_all()
 
         for row in money_form.items():
-            if row[0].count("?"):
-                # makas degerleri
-                term, currency = row[0].split("?")
-                if term == 'artis':
-                    if row[1] != "":  # isaretlendi ama deger girilmemis olabilir?
-                        MoneyData.set_makas_artis_value(currency, row[1][1])
-                elif term == 'azalis':
-                    if row[1] != "":  # isaretlendi ama deger girilmemis olabilir?
-                        MoneyData.set_makas_azalis_value(currency, row[1][1])
+            if row[0] not in ('moneyadminform', 'csrfmiddlewaretoken'):
+                key, value = row
+                if str(key).count("?"):
+                    # makas degerleri
+                    term, currency = key.split("?")
+                    if term == 'artis':
+                        if value != "":  # isaretlendi ama deger girilmemis olabilir?
+                            MoneyData.set_makas_artis_value(currency, float(value))
+                    elif term == 'azalis':
+                        if value != "":  # isaretlendi ama deger girilmemis olabilir?
+                            MoneyData.set_makas_azalis_value(currency, float(value))
 
-            else:
-                if row[1] == 'on':  # checkbox isaretlendiyse
-                    MoneyData.set_para_birimi_on(row[0])
+                else:
+                    if row[1] == 'on':  # checkbox isaretlendiyse
+                        MoneyData.set_para_birimi_on(row[0])

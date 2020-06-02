@@ -11,7 +11,7 @@ from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
 from dovizapp.forms import DumanUserRegisterForm, FormManager
 from dovizapp.models import DumanUser
-from dovizapp.pull_data.get_and_save import MoneyData
+from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
 auth = Auth()
@@ -179,6 +179,7 @@ def show_enduser_kurlar(request):
     data = get_data.runforme()
     data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
     data = get_data.order_money(data)
+
     tarih = get_data.get_tarih()
 
     # formatting currency
@@ -216,6 +217,7 @@ def load_admin_page(request):
     money_data = MoneyData.add_data_state_info(money_data)
     money_data = MoneyData.add_data_makas_value_info(money_data)
     money_data = get_data.order_money(money_data)
+    money_data = get_data.format_currency_data(money_data)
 
     # sarrafiye
     kgrtry_value = [i for i in money_data if i['title'] == "KGRTRY"][0]
@@ -233,3 +235,4 @@ def load_admin_page(request):
         'tarih': get_data.get_tarih(),
         'username': 'admin'
     })
+

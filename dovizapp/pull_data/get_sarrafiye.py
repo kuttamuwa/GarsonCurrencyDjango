@@ -25,8 +25,8 @@ class SarrafiyeInfo:
     @classmethod
     def format_currency_data(cls, data):
         for i in data:
-            i['alis'] = format(round(float(i['alis']), 4), ",")
-            i['satis'] = format(round(float(i['satis']), 4), ",")
+            i['alis'] = round(float(i['alis']), 4)
+            i['satis'] = round(float(i['satis']), 4)
 
         return data
 
