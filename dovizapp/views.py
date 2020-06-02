@@ -131,7 +131,7 @@ def doviz_admin_login(request):
                         phone_number = duman_user.get_phone_number()
                         AuthPhone.set_sifre(phone_number, sms_code, duman_user)
                         print(f"sms code : {sms_code}")
-                        # AuthPhone.send_msg(phone_number)
+                        AuthPhone.send_msg(phone_number)
 
                         return render(request, 'authpages/gunes_phone_auth.html', context)
 
