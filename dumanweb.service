@@ -1,0 +1,12 @@
+# vi /etc/systemd/system/dumanweb.service
+[Unit]
+Description=Duman ARGE Kuyumculuk Web Uygulaması
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/umut/PythonProjects/DumanWebDataService/apprun.sh
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target
