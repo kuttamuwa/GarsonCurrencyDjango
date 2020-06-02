@@ -25,7 +25,7 @@ SECRET_KEY = '32d&+ao$htt5(%2x81pu41u0lp!b)6$lq*7q#qke9re&!obh*)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['51.89.186.228']
+ALLOWED_HOSTS = ['127.0.0.1', '51.89.186.228']
 
 
 # Application definition
@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'WebDumanDjango.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'webdb',
+        'NAME': 'webdbdjango',
         'USER': 'postgres',
-        'PASSWORD': 'NeDvEd.1190',
+        'PASSWORD': '12345',
         'HOST': 'localhost',
         'PORT': '5432',
     }

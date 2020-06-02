@@ -3,7 +3,7 @@ import random
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.shortcuts import render, redirect
 
 from dovizapp import Auth
@@ -131,10 +131,11 @@ def doviz_admin_login(request):
                         phone_number = duman_user.get_phone_number()
                         AuthPhone.set_sifre(phone_number, sms_code, duman_user)
                         print(f"sms code : {sms_code}")
-                        AuthPhone.send_msg(phone_number)
+                        if AuthPhone.send_msg(phone_number):
+                            return render(request, 'authpages/gunes_phone_auth.html', context)
 
-                        return render(request, 'authpages/gunes_phone_auth.html', context)
-
+                        else:
+                            return HttpResponse(ValueError('Telefon numarasına kod gönderilemedi'))
                     else:
                         return render(request, 'error_pages/wrong_password.html')
 
