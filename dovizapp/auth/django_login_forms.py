@@ -5,7 +5,7 @@ class UserPassLoginForm(forms.Form):
     username = forms.CharField(
         required=True,
         label='Kullanıcı Adı',
-        max_length=20
+        max_length=80
     )
     password = forms.CharField(
         required=False,
