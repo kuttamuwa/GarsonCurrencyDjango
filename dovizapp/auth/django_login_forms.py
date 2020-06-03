@@ -4,7 +4,7 @@ from django import forms
 class UserPassLoginForm(forms.Form):
     username = forms.CharField(
         required=True,
-        label='Kullanıcı Adı',
+        label='Kullanıcı email',
         max_length=80
     )
     password = forms.CharField(
