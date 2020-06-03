@@ -187,7 +187,7 @@ def doviz_admin_login(request):
                     return render(request, 'error_pages/wrong_sms_code.html')
 
         else:
-            print("general error form ")
+            print(f"general error form :{form.errors}")
             return render(request, 'error_pages/general_error.html', context={'errors': form.errors})
 
 
