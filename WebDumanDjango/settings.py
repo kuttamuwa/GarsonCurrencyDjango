@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'WebDumanDjango.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'webdb',
+        'NAME': 'webdbdjango',
         'USER': 'postgres',
-        'PASSWORD': '!@#QWEasd&!@N@n0Xen0n@2o2o@!',
+        'PASSWORD': '12345',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -124,6 +124,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'dovizapp.DumanUser'
+AUTH_USER_MODEL = 'dovizapp.CustomUser'
 
 SESSION_COOKIE_AGE = 600

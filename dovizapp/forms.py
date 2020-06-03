@@ -1,20 +1,30 @@
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
+# from dovizapp.models import DBConnection
 
-from dovizapp.models import DumanUser
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
 from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
+from .models import CustomUser
 
 
-class DumanUserRegisterForm(UserCreationForm):
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta(UserCreationForm):
+        model = CustomUser
+        fields = ('email', 'phone_number')
+
+
+class CustomUserChangeForm(UserChangeForm):
+
     class Meta:
-        model = DumanUser
-        fields = ['username', 'password1', 'password2', 'phone_number', 'email']
+        model = CustomUser
+        fields = ('email', 'phone_number')
 
 
 class FormManager:
     # kolay olsun diye
     formtypes = {'sarrafiyeadminform': 1, 'moneyadminform': 2}
+    # _dbconnection = DBConnection.get_db_connection()
 
     @classmethod
     def get_formtypes(cls, form_name):
@@ -51,6 +61,9 @@ class FormManager:
                 else:
                     if value == 'on':
                         SarrafiyeInfo.turn_on_represent_value(key)
+
+        # df = pd.DataFrame.from_dict(sarrafiye_form)
+        # df.to_sql('sarrafiye_makas_table', con=FormManager._dbconnection, if_exists='replace')
 
     @staticmethod
     def money_admin_manage(money_form):

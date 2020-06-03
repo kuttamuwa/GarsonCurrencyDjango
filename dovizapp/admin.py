@@ -1,20 +1,28 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
 
-from dovizapp.models import DumanUser
-
-
-# class DumanUserInline(admin.StackedInline):
-#     model = DumanUser
-#     can_delete = True
-#     verbose_name_plural = 'dumanuser'
-#
-#
-# class DumanUserAdmin(BaseUserAdmin):
-#     inlines = (DumanUserInline, )
+from .forms import CustomUserCreationForm, CustomUserChangeForm
+from .models import CustomUser
 
 
-# admin.site.unregister(User)
-admin.site.register(DumanUser)
-# admin.site.register_alternative(NormalUser, UserAdmin)
+class CustomUserAdmin(UserAdmin):
+    add_form = CustomUserCreationForm
+    form = CustomUserChangeForm
+    model = CustomUser
+    list_display = ('email', 'phone_number', 'is_staff', 'is_active',)
+    list_filter = ('email', 'phone_number', 'is_staff', 'is_active',)
+    fieldsets = (
+        (None, {'fields': ('email', 'password', 'phone_number')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'phone_number', 'is_staff', 'is_active')}
+        ),
+    )
+    search_fields = ('email',)
+    ordering = ('email',)
+
+
+admin.site.register(CustomUser, CustomUserAdmin)

@@ -9,8 +9,8 @@ from django.shortcuts import render, redirect
 from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
-from dovizapp.forms import DumanUserRegisterForm, FormManager
-from dovizapp.models import DumanUser
+from dovizapp.forms import FormManager, CustomUserCreationForm
+from dovizapp.models import CustomUser
 from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
@@ -21,11 +21,11 @@ def index(request):
 
 
 def register_alternative(request):
-    form = DumanUserRegisterForm()
+    form = CustomUserCreationForm()
     context = {"form": form}
 
     if request.method == "POST":
-        form = DumanUserRegisterForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
@@ -128,7 +128,7 @@ def doviz_admin_login(request):
 
                         # sms kodu yolla
                         sms_code = random.randint(10000, 99999)
-                        phone_number = duman_user.get_phone_number()
+                        phone_number = duman_user.phone_number
                         AuthPhone.set_sifre(phone_number, sms_code, duman_user)
                         print(f"sms code : {sms_code}")
                         if AuthPhone.send_msg(phone_number):
@@ -139,14 +139,14 @@ def doviz_admin_login(request):
                     else:
                         return render(request, 'error_pages/wrong_password.html')
 
-                except DumanUser.DoesNotExist:
+                except CustomUser.DoesNotExist:
                     return render(request, 'error_pages/doesnotexist_user.html')
 
             else:
                 try:
                     # sms kodu doğrulama
                     sent_sms_code = int(form.cleaned_data.get('phone_sms_code'))
-                    phone_number = DumanUser.objects.get(username=username).get_phone_number()
+                    phone_number = CustomUser.objects.get(email=username).phone_number
                     stored_sms_code = AuthPhone.get_sifre(phone_number)
                     if stored_sms_code:
                         stored_sms_code, duman_user = stored_sms_code
@@ -155,6 +155,9 @@ def doviz_admin_login(request):
                             AuthPhone.reset(phone_number)
                             return redirect('dovizadmin')
 
+                        else:
+                            return render(request, 'error_pages/wrong_sms_code.html')
+
                     else:
                         # demek ki username password kismi geçilmemiş bi şekilde direk kod denemesi yapilyor
                         return render(request, 'error_pages/general_error.html',
@@ -162,7 +165,7 @@ def doviz_admin_login(request):
                                           'errors': 'Kullanıcı adı şifre girişi yapılmadan '
                                                     'telefon kodu şifresi denemesi yapiliyor!'})
 
-                except DumanUser.DoesNotExist:
+                except CustomUser.DoesNotExist:
                     return render(request, 'error_pages/wrong_sms_code.html')
 
         else:
@@ -234,4 +237,20 @@ def load_admin_page(request):
         'tarih': get_data.get_tarih(),
         'username': 'admin'
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
