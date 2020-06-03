@@ -3,10 +3,9 @@ import random
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse, Http404
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
-from dovizapp import Auth
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
 from dovizapp.forms import FormManager, CustomUserCreationForm
@@ -28,8 +27,8 @@ def register_alternative(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'{username} kullanıcısı başarıyla oluşturuldu !')
+            email = form.cleaned_data.get('email')
+            messages.success(request, f'{email} kullanıcısı başarıyla oluşturuldu !')
             return redirect('login')
 
     return render(request, 'admin_pages/register.html', context)
@@ -37,10 +36,10 @@ def register_alternative(request):
 
 def login_alternative(request):
     if request.method == "POST":
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
             return redirect('dovizadmin')
@@ -119,18 +118,18 @@ def doviz_admin_login(request):
 
         if form.is_valid():
             print("form geçerli")
-            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
 
             if form.cleaned_data.get('phone_sms_code') == "":
                 print("kullanıcı adı ve şifre gönderildi")
                 # kullanıcı adı şifre girilmiş şimdi telefon kodu yollayacağız
                 password = form.cleaned_data.get('password')
                 try:
-                    duman_user = authenticate(request, username=username, password=password)
+                    duman_user = authenticate(request, email=email, password=password)
                     print("authenticate fonksiyonu çalıştı")
                     if duman_user:
                         print("authenticate passed")
-                        context = {'form': form, 'username': username}
+                        context = {'form': form, 'email': email}
 
                         # sms kodu yolla
                         sms_code = random.randint(10000, 99999)
@@ -157,7 +156,7 @@ def doviz_admin_login(request):
                     print("Telefon kodu gönderildi")
                     # sms kodu doğrulama
                     sent_sms_code = int(form.cleaned_data.get('phone_sms_code'))
-                    phone_number = CustomUser.objects.get(email=username).phone_number
+                    phone_number = CustomUser.objects.get(email=email).phone_number
                     stored_sms_code = AuthPhone.get_sifre(phone_number)
                     print("Auth phone was gotten")
                     if stored_sms_code:
@@ -175,7 +174,7 @@ def doviz_admin_login(request):
                             return render(request, 'error_pages/wrong_sms_code.html')
 
                     else:
-                        # demek ki username password kismi geçilmemiş bi şekilde direk kod denemesi yapilyor
+                        # demek ki email password kismi geçilmemiş bi şekilde direk kod denemesi yapilyor
                         print("imkansız nokta")
                         return render(request, 'error_pages/general_error.html',
                                       {
@@ -254,7 +253,7 @@ def load_admin_page(request):
         'sarrafiyeshown': [i for i in sarrafiye_data if i['title'] in SarrafiyeInfo.get_on_represent_values()],
         'sarrafiyeadmin': sarrafiye_data,
         'tarih': get_data.get_tarih(),
-        'username': 'admin'
+        'email': 'admin'
     })
 
 
