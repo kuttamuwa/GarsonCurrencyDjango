@@ -70,6 +70,7 @@
 
                     <h4>Kullanıcı Girişi</h4>
                     <form>
+                        {% csrf_token %}
                         <div class="form-group">
 
                             <input type="email" class="form-control" placeholder="Kullanıcı Adı" id="exampleInputEmail1"

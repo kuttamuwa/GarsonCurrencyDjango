@@ -76,6 +76,7 @@
 <div class="container my-4" id="sarrafiyeshown">
     <p> Sarrafiye Gösterimi {{ tarih }}</p>
     <form class="form-horizontal form-group-lg" role="form" method="get">
+        {% csrf_token %}
         {% if sarrafiyeshown %}
             <table class="table" border="1">
                 <thead>
@@ -194,7 +195,8 @@
                         <div class="col" id="artiscol">
                             <input type="number" name=artis?{{ moneyrow.title }} class="form-control"
                                    id="moneyform"
-                                   placeholder="Artış değerini giriniz" step="any" value={{ moneyrow.artis|stringformat:"f" }}>
+                                   placeholder="Artış değerini giriniz" step="any"
+                                   value={{ moneyrow.artis|stringformat:"f" }}>
                         </div>
 
                     {% else %}
@@ -209,7 +211,8 @@
                         <div class="col" id="azalisform">
                             <input type="number" name=azalis?{{ moneyrow.title }} class="form-control"
                                    id="moneyform"
-                                   placeholder="Azalış değerini giriniz" step="any" value={{ moneyrow.azalis|stringformat:"f" }}>
+                                   placeholder="Azalış değerini giriniz" step="any"
+                                   value={{ moneyrow.azalis|stringformat:"f" }}>
                         </div>
                     {% else %}
                         <div class="col" id="azalisform">

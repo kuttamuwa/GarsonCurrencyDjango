@@ -107,68 +107,87 @@ def show_mobil_kurlar(request):
 
 def doviz_admin_login(request):
     if request.method == "GET":
+        print("İlk form gönderildi, GET")
         # login sayfasi ilk açıldığında kullanıcı adı ve şifre girilir
         context = {'form': UserPassLoginForm}
         return render(request, 'authpages/gunes_first_auth.html', context)
 
     elif request.method == "POST":
+        print("İkinci form gönderildi, POST. Ama hangisi bilmiyoruz")
         # form gönderilmiş, user-pwd mi yoksa tel kodu mu henüz bilmiyoruz
         form = UserPassLoginForm(request.POST)
 
         if form.is_valid():
+            print("form geçerli")
             username = form.cleaned_data.get('username')
 
             if form.cleaned_data.get('phone_sms_code') == "":
+                print("kullanıcı adı ve şifre gönderildi")
                 # kullanıcı adı şifre girilmiş şimdi telefon kodu yollayacağız
                 password = form.cleaned_data.get('password')
                 try:
                     duman_user = authenticate(request, username=username, password=password)
+                    print("authenticate fonksiyonu çalıştı")
                     if duman_user:
+                        print("authenticate passed")
                         context = {'form': form, 'username': username}
 
                         # sms kodu yolla
                         sms_code = random.randint(10000, 99999)
                         phone_number = duman_user.phone_number
                         AuthPhone.set_sifre(phone_number, sms_code, duman_user)
-                        print(f"sms code : {sms_code}")
+                        print(f"sms code was set : {sms_code}")
                         if AuthPhone.send_msg(phone_number):
+                            print("TELEFON NO HTML GONDERILECEK")
                             return render(request, 'authpages/gunes_phone_auth.html', context)
 
                         else:
+                            print("Telefon no kod gönderilemedi")
                             return HttpResponse(ValueError('Telefon numarasına kod gönderilemedi'))
                     else:
+                        print("Yanlis parola !")
                         return render(request, 'error_pages/wrong_password.html')
 
                 except CustomUser.DoesNotExist:
+                    print("User bulunamadı")
                     return render(request, 'error_pages/doesnotexist_user.html')
 
             else:
                 try:
+                    print("Telefon kodu gönderildi")
                     # sms kodu doğrulama
                     sent_sms_code = int(form.cleaned_data.get('phone_sms_code'))
                     phone_number = CustomUser.objects.get(email=username).phone_number
                     stored_sms_code = AuthPhone.get_sifre(phone_number)
+                    print("Auth phone was gotten")
                     if stored_sms_code:
+                        print("stored sms code was taken")
                         stored_sms_code, duman_user = stored_sms_code
                         if stored_sms_code == sent_sms_code:
+                            print("Stored sms code equals sent sms code")
                             login(request, duman_user)
+                            print("logged in")
                             AuthPhone.reset(phone_number)
                             return redirect('dovizadmin')
 
                         else:
+                            print("wrong sms code")
                             return render(request, 'error_pages/wrong_sms_code.html')
 
                     else:
                         # demek ki username password kismi geçilmemiş bi şekilde direk kod denemesi yapilyor
+                        print("imkansız nokta")
                         return render(request, 'error_pages/general_error.html',
                                       {
                                           'errors': 'Kullanıcı adı şifre girişi yapılmadan '
                                                     'telefon kodu şifresi denemesi yapiliyor!'})
 
                 except CustomUser.DoesNotExist:
+                    print("wrong sms code html rendered")
                     return render(request, 'error_pages/wrong_sms_code.html')
 
         else:
+            print("general error form ")
             return render(request, 'error_pages/general_error.html', context={'errors': form.errors})
 
 
