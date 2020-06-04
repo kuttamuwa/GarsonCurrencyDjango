@@ -1,21 +1,23 @@
 # from dovizapp.models import DBConnection
 
+import os
+import pickle
+
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
+
 from .models import CustomUser
 
 
 class CustomUserCreationForm(UserCreationForm):
-
     class Meta(UserCreationForm):
         model = CustomUser
         fields = ('email', 'phone_number')
 
 
 class CustomUserChangeForm(UserChangeForm):
-
     class Meta:
         model = CustomUser
         fields = ('email', 'phone_number')
@@ -24,6 +26,7 @@ class CustomUserChangeForm(UserChangeForm):
 class FormManager:
     # kolay olsun diye
     formtypes = {'sarrafiyeadminform': 1, 'moneyadminform': 2}
+
     # _dbconnection = DBConnection.get_db_connection()
 
     @classmethod
@@ -62,8 +65,8 @@ class FormManager:
                     if value == 'on':
                         SarrafiyeInfo.turn_on_represent_value(key)
 
-        # df = pd.DataFrame.from_dict(sarrafiye_form)
-        # df.to_sql('sarrafiye_makas_table', con=FormManager._dbconnection, if_exists='replace')
+        # serializing SarrafiyeInfo
+        SarrafiyeInfo.serialize()
 
     @staticmethod
     def money_admin_manage(money_form):
@@ -90,3 +93,5 @@ class FormManager:
                 else:
                     if row[1] == 'on':  # checkbox isaretlendiyse
                         MoneyData.set_para_birimi_on(row[0])
+
+        MoneyData.serialize()

@@ -1,26 +1,29 @@
 import datetime
+import os
+import pickle
 
 
 class SarrafiyeInfo:
     tarih_format = '%d.%m.%Y %H:%M:%S'
     tarih = datetime.datetime.now().strftime(tarih_format)
-    _infos = {'Çeyrek': {'title': 'Çeyrek', 'alis': None, 'satis': None},
-              'Yarım': {'title': 'Yarım', 'alis': None, 'satis': None},
-              'Ziynet_Lira': {'title': 'Ziynet_Lira', 'alis': None, 'satis': None},
-              'Ata_Lira': {'title': 'Ata_Lira', 'alis': None, 'satis': None},
-              'Hurda_24': {'title': 'Hurda_24', 'alis': None, 'satis': None},
-              'Hurda_22': {'title': 'Hurda_22', 'alis': None, 'satis': None}}
+    infos = {'Çeyrek': {'title': 'Çeyrek', 'alis': None, 'satis': None},
+             'Yarım': {'title': 'Yarım', 'alis': None, 'satis': None},
+             'Ziynet_Lira': {'title': 'Ziynet_Lira', 'alis': None, 'satis': None},
+             'Ata_Lira': {'title': 'Ata_Lira', 'alis': None, 'satis': None},
+             'Hurda_24': {'title': 'Hurda_24', 'alis': None, 'satis': None},
+             'Hurda_22': {'title': 'Hurda_22', 'alis': None, 'satis': None}}
 
-    _makasvalues = {'Çeyrek': {'title': 'Çeyrek', 'artis': 1, 'azalis': 1},
-                    'Yarım': {'title': 'Yarım', 'artis': 1, 'azalis': 1},
-                    'Ziynet_Lira': {'title': 'Ziynet_Lira', 'artis': 1, 'azalis': 1},
-                    'Ata_Lira': {'title': 'Ata_Lira', 'artis': 1, 'azalis': 1},
-                    'Hurda_24': {'title': 'Hurda_24', 'artis': 1, 'azalis': 1},
-                    'Hurda_22': {'title': 'Hurda_22', 'artis': 1, 'azalis': 1}}
+    makasvalues = {'Çeyrek': {'title': 'Çeyrek', 'artis': 1, 'azalis': 1},
+                   'Yarım': {'title': 'Yarım', 'artis': 1, 'azalis': 1},
+                   'Ziynet_Lira': {'title': 'Ziynet_Lira', 'artis': 1, 'azalis': 1},
+                   'Ata_Lira': {'title': 'Ata_Lira', 'artis': 1, 'azalis': 1},
+                   'Hurda_24': {'title': 'Hurda_24', 'artis': 1, 'azalis': 1},
+                   'Hurda_22': {'title': 'Hurda_22', 'artis': 1, 'azalis': 1}}
 
     represent_values = {'Çeyrek': True, 'Yarım': True, 'Ziynet_Lira': True,
                         'Ata_Lira': True, 'Hurda_24': True, 'Hurda_22': True}
-    __KGRTRY = {'alis': 0, 'satis': 0}
+    KGRTRY = {'alis': 0, 'satis': 0}
+    output_file = os.path.join(os.path.dirname(__file__), 'sarrafiye_serialized.pkl')
 
     @classmethod
     def format_currency_data(cls, data):
@@ -86,7 +89,7 @@ class SarrafiyeInfo:
         :param _type: artis, azalis
         :return:
         """
-        cls._makasvalues[sarrafiye][_type] = value
+        cls.makasvalues[sarrafiye][_type] = value
         cls.update_info_values()
 
     @classmethod
@@ -97,11 +100,11 @@ class SarrafiyeInfo:
         :param _type: artis, azalis
         :return:
         """
-        return cls._makasvalues[sarrafiye][_type]
+        return cls.makasvalues[sarrafiye][_type]
 
     @classmethod
     def get_all_makas_values(cls):
-        return cls._makasvalues
+        return cls.makasvalues
 
     @classmethod
     def update_info_values(cls):
@@ -112,32 +115,26 @@ class SarrafiyeInfo:
         """
         cls.check_kgrtry()
 
-        for key in cls._infos.keys():
-            cls._infos[key]['alis'] = float(cls.get_kgrtry('alis')) * float(cls._makasvalues[key]['artis'])
-            cls._infos[key]['satis'] = float(cls.get_kgrtry('alis')) * float(cls._makasvalues[key]['azalis'])
-
-    @classmethod
-    def reset_all_makas_values(cls):
-        for key in cls._makasvalues.keys():
-            cls._makasvalues[key]['artis'] = 1
-            cls._makasvalues[key]['azalis'] = 1
+        for key in cls.infos.keys():
+            cls.infos[key]['alis'] = float(cls.get_kgrtry('alis')) * float(cls.makasvalues[key]['artis'])
+            cls.infos[key]['satis'] = float(cls.get_kgrtry('alis')) * float(cls.makasvalues[key]['azalis'])
 
     @classmethod
     def get_sarrafiye_info(cls):
-        return cls._infos
+        return cls.infos
 
     @classmethod
     def set_sarrafiye_info(cls, sarrafiye, value, _type='alis'):
-        cls._infos[sarrafiye][_type] = value
+        cls.infos[sarrafiye][_type] = value
 
     @classmethod
     def get_kgrtry(cls, _type='alis'):
-        return cls.__KGRTRY[_type]
+        return cls.KGRTRY[_type]
 
     @classmethod
     def set_kgrtry(cls, alisvalue, satisvalue):
-        cls.__KGRTRY['alis'] = alisvalue
-        cls.__KGRTRY['satis'] = satisvalue
+        cls.KGRTRY['alis'] = alisvalue
+        cls.KGRTRY['satis'] = satisvalue
         # update sarrafiye infos
         cls.update_info_values()
 
@@ -150,5 +147,41 @@ class SarrafiyeInfo:
 
     @classmethod
     def get_data(cls):
-        data = [v for k, v in cls._infos.items()]
+        data = [v for k, v in cls.infos.items()]
         return data
+
+    @classmethod
+    def serialize(cls):
+        if os.path.exists(cls.output_file):
+            os.remove(cls.output_file)
+
+        outfile = open(cls.output_file, 'wb')
+        pickle.dump(cls, outfile, pickle.HIGHEST_PROTOCOL)
+        outfile.close()
+        print("serialized")
+
+    @classmethod
+    def get_pickled(cls):
+        infile = open(cls.output_file, 'rb')
+        obj = pickle.load(infile)
+        infile.close()
+
+        return obj
+
+    @classmethod
+    def reserialize(cls):
+        if not os.path.exists(cls.output_file):
+            print("uygulama ilk defa ayaga kalkiyor ..")
+
+        else:
+            obj = cls.get_pickled()
+            cls.load_from_pickled(obj)
+
+    @classmethod
+    def load_from_pickled(cls, pickled_object):
+        cls.KGRTRY = pickled_object.KGRTRY
+        cls.represent_values = pickled_object.represent_values
+        cls.infos = pickled_object.infos
+        cls.makasvalues = pickled_object.makasvalues
+        cls.tarih = pickled_object.tarih
+        print("pickle loaded")

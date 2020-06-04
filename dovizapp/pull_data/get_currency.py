@@ -5,6 +5,8 @@ import locale
 import requests
 
 from dovizapp.auth.config_reader import ConfiguresReader
+import os
+import pickle
 
 locale.setlocale(locale.LC_ALL, "tr_TR.utf8")
 
@@ -18,6 +20,8 @@ class MoneyData:
     makasvalues = {}
     money_states = {}
     money_config = None
+
+    output_file = os.path.join(os.path.dirname(__file__), 'currency_serialized.pkl')
 
     def __init__(self):
         self.tarih = None
@@ -272,3 +276,33 @@ class MoneyData:
                 )
 
         return new_data
+
+    @classmethod
+    def serialize(cls):
+        print(f"output serialized path : {cls.output_file}")
+        if os.path.exists(cls.output_file):
+            os.remove(cls.output_file)
+
+        outfile = open(cls.output_file, 'wb')
+        pickle.dump(MoneyData, cls.output_file, pickle.HIGHEST_PROTOCOL)
+        outfile.close()
+
+    @classmethod
+    def reserialize(cls):
+        if not os.path.exists(cls.output_file):
+            print("uygulama ilk defa ayaga kalkiyor ..")
+
+        else:
+            print(f"input serialized path : {cls.output_file}")
+            infile = open(cls.output_file, 'rb')
+            obj = pickle.load(infile)
+            cls.load_from_pickled_object(obj)
+
+            infile.close()
+
+    @classmethod
+    def load_from_pickled_object(cls, pickled_object):
+        cls.static_titles = pickled_object.static_titles
+        cls.makasvalues = pickled_object.makasvalues
+        cls.money_states = pickled_object.money_states
+        cls.money_config = pickled_object.money_config
