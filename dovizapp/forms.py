@@ -4,6 +4,7 @@ import os
 import pickle
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django import forms
 
 from dovizapp.pull_data.get_currency import MoneyData
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
