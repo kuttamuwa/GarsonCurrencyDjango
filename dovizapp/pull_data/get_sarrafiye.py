@@ -155,8 +155,12 @@ class SarrafiyeInfo:
         if os.path.exists(cls.output_file):
             os.remove(cls.output_file)
 
+        _dict = {
+            'makasvalues': cls.makasvalues
+        }
+
         outfile = open(cls.output_file, 'wb')
-        pickle.dump(cls, outfile, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(_dict, outfile, pickle.HIGHEST_PROTOCOL)
         outfile.close()
         print("serialized")
 
@@ -179,9 +183,5 @@ class SarrafiyeInfo:
 
     @classmethod
     def load_from_pickled(cls, pickled_object):
-        cls.KGRTRY = pickled_object.KGRTRY
-        cls.represent_values = pickled_object.represent_values
-        cls.infos = pickled_object.infos
-        cls.makasvalues = pickled_object.makasvalues
-        cls.tarih = pickled_object.tarih
-        print("pickle loaded")
+        cls.makasvalues = pickled_object['makasvalues']
+        print("sarrafiye makas degerleri son oturumdan yuklendi")

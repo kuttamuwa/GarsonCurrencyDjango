@@ -247,8 +247,6 @@ def load_admin_page(request):
     sarrafiye_data = SarrafiyeInfo.add_data_makas_value_info(sarrafiye_data)
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
 
-    SarrafiyeInfo.reserialize()
-
     return render(request, 'admin_pages/data_managing_page.html', {
         'moneyshown': [i for i in money_data if i['title'] in MoneyData.get_para_birimleri_on()],
         'moneyadmin': money_data,

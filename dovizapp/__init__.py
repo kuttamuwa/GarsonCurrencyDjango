@@ -13,6 +13,6 @@ if MoneyData.get_para_birimleri_all_liste() is None:
     MoneyData().runforme()
 
 # reserializing
-# MoneyData.reserialize()
+MoneyData.reserialize()
 
 SarrafiyeInfo.reserialize()

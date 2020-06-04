@@ -279,13 +279,25 @@ class MoneyData:
 
     @classmethod
     def serialize(cls):
-        print(f"output serialized path : {cls.output_file}")
         if os.path.exists(cls.output_file):
             os.remove(cls.output_file)
 
+        _dict = {
+            'makasvalues': cls.makasvalues
+        }
+
         outfile = open(cls.output_file, 'wb')
-        pickle.dump(MoneyData, cls.output_file, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(_dict, outfile, pickle.HIGHEST_PROTOCOL)
         outfile.close()
+        print("serialized")
+
+    @classmethod
+    def get_pickled(cls):
+        infile = open(cls.output_file, 'rb')
+        obj = pickle.load(infile)
+        infile.close()
+
+        return obj
 
     @classmethod
     def reserialize(cls):
@@ -293,16 +305,10 @@ class MoneyData:
             print("uygulama ilk defa ayaga kalkiyor ..")
 
         else:
-            print(f"input serialized path : {cls.output_file}")
-            infile = open(cls.output_file, 'rb')
-            obj = pickle.load(infile)
-            cls.load_from_pickled_object(obj)
-
-            infile.close()
+            obj = cls.get_pickled()
+            cls.load_from_pickled(obj)
 
     @classmethod
-    def load_from_pickled_object(cls, pickled_object):
-        cls.static_titles = pickled_object.static_titles
-        cls.makasvalues = pickled_object.makasvalues
-        cls.money_states = pickled_object.money_states
-        cls.money_config = pickled_object.money_config
+    def load_from_pickled(cls, pickled_object):
+        cls.makasvalues = pickled_object['makasvalues']
+        print("doviz makas degerleri son oturumdan yuklendi")
