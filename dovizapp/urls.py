@@ -13,7 +13,6 @@ urlpatterns = [
 
     # login, logout vs
     path('logout', views.dovizadmin_logout, name='logout'),
-    path('register', views.register_alternative, name='register'),
     path('dovizlogin', views.doviz_admin_login, name='dovizlogin'),
     # aynisi
     path('login', views.doviz_admin_login, name='login'),

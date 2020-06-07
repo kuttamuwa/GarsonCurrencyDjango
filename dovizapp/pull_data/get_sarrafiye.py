@@ -2,6 +2,8 @@ import datetime
 import os
 import pickle
 
+from dovizapp.auth.config_reader import ConfiguresReader
+
 
 class SarrafiyeInfo:
     tarih_format = '%d.%m.%Y %H:%M:%S'
@@ -23,7 +25,38 @@ class SarrafiyeInfo:
     represent_values = {'Çeyrek': True, 'Yarım': True, 'Ziynet_Lira': True,
                         'Ata_Lira': True, 'Hurda_24': True, 'Hurda_22': True}
     KGRTRY = {'alis': 0, 'satis': 0}
+    money_config = None
+
     output_file = os.path.join(os.path.dirname(__file__), 'sarrafiye_serialized.pkl')
+
+    @classmethod
+    def order_sarrafiye(cls, data):
+        """
+        it orders list via config
+        :param data: dictionary in list contains title, alis, satis
+        :return: dictionary in list
+        """
+        new_data_list = []
+        # todo : amına kodumunun utf-8 meselesi siktiğimin pitonu orospu çocukları o zaman ne sik demeye py3 çıkardınız
+        order_list = cls.get_money_config()['sarrafiyeorder'].split(",")
+        for i in data:
+            currency = i['title']
+            if currency in order_list:
+                new_data_list.insert(order_list.index(currency), i)
+
+            else:
+                new_data_list.insert(-1, i)
+
+        return new_data_list
+
+    @classmethod
+    def set_money_config(cls, money_config_path):
+        config = ConfiguresReader(money_config_path)
+        cls.money_config = config.read_section('moneyconfig')
+
+    @classmethod
+    def get_money_config(cls):
+        return cls.money_config
 
     @classmethod
     def format_currency_data(cls, data):

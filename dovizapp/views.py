@@ -19,37 +19,6 @@ def index(request):
     return render(request, 'site_pages/homepage.html')
 
 
-def register_alternative(request):
-    form = CustomUserCreationForm()
-    context = {"form": form}
-
-    if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            email = form.cleaned_data.get('email')
-            messages.success(request, f'{email} kullanıcısı başarıyla oluşturuldu !')
-            return redirect('login')
-
-    return render(request, 'admin_pages/register.html', context)
-
-
-def login_alternative(request):
-    if request.method == "POST":
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('dovizadmin')
-        else:
-            messages.info(request, "Kullanıcı adı veya şifre yanlış !")
-
-    context = {}
-    return render(request, 'admin_pages/login.html', context)
-
-
 def about_page(request):
     return render(request, 'site_pages/about.html')
 
@@ -66,6 +35,7 @@ def show_enduser_sarrafiye(request):
     kgrtry_value = MoneyData().runforsarrafiye()
     SarrafiyeInfo.set_kgrtry(kgrtry_value['alis'], kgrtry_value['satis'])
     sarrafiye_data = SarrafiyeInfo.get_data()
+    sarrafiye_data = SarrafiyeInfo.order_sarrafiye(sarrafiye_data)
 
     # formatting currency
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
@@ -79,6 +49,7 @@ def show_mobil_sarrafiye(request):
     kgrtry_value = get_money.runforsarrafiye()
     SarrafiyeInfo.set_kgrtry(kgrtry_value['alis'], kgrtry_value['satis'])
     sarrafiye_data = SarrafiyeInfo.get_data()
+    sarrafiye_data = SarrafiyeInfo.order_sarrafiye(sarrafiye_data)
 
     # formatting currency
     sarrafiye_data = SarrafiyeInfo.format_currency_data(sarrafiye_data)
@@ -102,6 +73,24 @@ def show_mobil_kurlar(request):
     tarih = get_data.get_tarih()
 
     return JsonResponse(data={'data': data, 'tarih': tarih})
+
+
+def show_enduser_kurlar(request):
+    """
+    Son kullanıcının webten bakacagi yer. Admin panelinde seçilenler dondurulur.
+    :return:
+    """
+    get_data = MoneyData()
+    data = get_data.runforme()
+    data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
+    data = get_data.order_money(data)
+
+    tarih = get_data.get_tarih()
+
+    # formatting currency
+    data = MoneyData.format_currency_data(data)
+
+    return render(request, 'show_pages/web/web_kurlar.html', {'data': data, 'tarih': tarih})
 
 
 def doviz_admin_login(request):
@@ -190,24 +179,6 @@ def doviz_admin_login(request):
             return render(request, 'error_pages/general_error.html', context={'errors': form.errors})
 
 
-def show_enduser_kurlar(request):
-    """
-    Son kullanıcının webten bakacagi yer. Admin panelinde seçilenler dondurulur.
-    :return:
-    """
-    get_data = MoneyData()
-    data = get_data.runforme()
-    data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
-    data = get_data.order_money(data)
-
-    tarih = get_data.get_tarih()
-
-    # formatting currency
-    data = MoneyData.format_currency_data(data)
-
-    return render(request, 'show_pages/web/web_kurlar.html', {'data': data, 'tarih': tarih})
-
-
 def dovizadmin_logout(request):
     logout(request)
     return redirect('homepage')
@@ -255,20 +226,3 @@ def load_admin_page(request):
         'tarih': get_data.get_tarih(),
         'email': 'admin'
     })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

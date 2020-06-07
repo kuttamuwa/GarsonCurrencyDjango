@@ -157,7 +157,8 @@ class MoneyData:
 
         return data
 
-    def order_money(self, data):
+    @classmethod
+    def order_money(cls, data):
         """
         it orders list via config
         :param data: dictionary in list contains title, alis, satis
@@ -165,7 +166,7 @@ class MoneyData:
         """
         new_data_list = []
 
-        order_list = self.get_money_config()['order'].split(",")
+        order_list = cls.get_money_config()['dovizorder'].split(",")
         for i in data:
             currency = i['title']
             if currency in order_list:
