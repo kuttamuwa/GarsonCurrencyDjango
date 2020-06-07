@@ -40,7 +40,7 @@ class SarrafiyeInfo:
         # todo : amına kodumunun utf-8 meselesi siktiğimin pitonu orospu çocukları o zaman ne sik demeye py3 çıkardınız
         order_list = cls.get_money_config()['sarrafiyeorder'].split(",")
         for i in data:
-            currency = i['title']
+            currency = i['title'].strip()
             if currency in order_list:
                 new_data_list.insert(order_list.index(currency), i)
 

@@ -22,7 +22,7 @@ class ConfiguresReader:
     def read_section(self, section):
         sec_dict = {}
         configure = configparser.ConfigParser()
-        configure.read(self.config_path)
+        configure.read(self.config_path, 'utf-8')
         options = configure.options(section)
         for opt in options:
             sec_dict[opt] = configure.get(section, opt)
@@ -31,7 +31,7 @@ class ConfiguresReader:
 
     def list_sections(self):
         configure = configparser.ConfigParser()
-        configure.read(self.config_path)
+        configure.read(self.config_path, 'utf-8')
 
         return configure.sections()
 
