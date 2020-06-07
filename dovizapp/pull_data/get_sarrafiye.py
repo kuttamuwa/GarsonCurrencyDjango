@@ -37,7 +37,6 @@ class SarrafiyeInfo:
         :return: dictionary in list
         """
         new_data_list = []
-        # todo : amına kodumunun utf-8 meselesi siktiğimin pitonu orospu çocukları o zaman ne sik demeye py3 çıkardınız
         order_list = cls.get_money_config()['sarrafiyeorder'].split(",")
         for i in data:
             currency = i['title'].strip()

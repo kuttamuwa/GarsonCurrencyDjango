@@ -164,18 +164,19 @@ class MoneyData:
         :param data: dictionary in list contains title, alis, satis
         :return: dictionary in list
         """
-        new_data_list = []
+        config_ones = []
+        other_ones = []
 
         order_list = cls.get_money_config()['dovizorder'].split(",")
         for i in data:
             currency = i['title']
             if currency in order_list:
-                new_data_list.insert(order_list.index(currency), i)
+                config_ones.insert(order_list.index(currency), i)
 
             else:
-                new_data_list.insert(-1, i)
+                other_ones.append(i)
 
-        return new_data_list
+        return config_ones + other_ones
 
     def runforsarrafiye(self):
         decoded_data = self.istek_yap()
