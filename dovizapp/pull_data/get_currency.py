@@ -152,7 +152,7 @@ class MoneyData:
                     _dict_list.append((i['title'], _d))
                     uncompatible_ones += 1
 
-        # we're passing time value due to deal with it before
+        # we're passing broken
         # check step
         for _, i in _dict_list:
             if i['alis'] > i['satis']:
@@ -160,8 +160,9 @@ class MoneyData:
                 # raise SatisAlisException("Donusturmemize ragmen alis degeri satistan yuksek cikiyor !")
 
         # old style
-        data = dict(_dict_list)
-        return data
+        # data = dict(_dict_list)
+
+        return _dict_list
 
     def runforme(self):
         decoded_data = self.istek_yap()
@@ -172,6 +173,9 @@ class MoneyData:
 
         # ozbey fiyat check
         decoded_data = self.check_replace_ozbey_alis_satis(decoded_data)
+
+        # old style
+        decoded_data = dict(decoded_data)
 
         # Para Birimi ayari
         if self.get_para_birimleri_all_liste() is None:
@@ -211,16 +215,7 @@ class MoneyData:
         return data_with_confs + data_without_confs
 
     def runforsarrafiye(self):
-        decoded_data = self.istek_yap()
-
-        # tarih ayari
-        tarih = datetime.datetime.strptime(decoded_data[self.tarih_field], self.tarih_format)
-        self.set_tarih(tarih)
-
-        # makas
-        data = self.makas_processing(decoded_data)
-
-        return data['KGRTRY']
+        return [i for i in self.runforme() if i['title'] == 'KGRTRY'][0]
 
     @classmethod
     def _set_para_birimleri_init_with_turned(cls, decoded_data):
