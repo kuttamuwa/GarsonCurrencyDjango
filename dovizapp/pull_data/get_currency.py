@@ -1,12 +1,12 @@
 import datetime
 import json
 import locale
+import os
+import pickle
 
 import requests
 
 from dovizapp.auth.config_reader import ConfiguresReader
-import os
-import pickle
 
 locale.setlocale(locale.LC_ALL, "tr_TR.utf8")
 
@@ -127,35 +127,51 @@ class MoneyData:
     def set_tarih(self, value):
         self.tarih = value
 
-    @staticmethod
-    def check_replace_ozbey_alis_satis(data):
-        _dict_list = {}
-        for _, i in data.items():
+    def check_replace_ozbey_alis_satis(self, data):
+        _dict_list = []
+
+        data_list = list(data.items())
+
+        compatible_ones = 0
+        uncompatible_ones = 0
+
+        for _, i in data_list:
             if isinstance(i, dict):
+                alis, satis = float(i['alis'].replace(",", ".")), float(i['satis'].replace(",", "."))
+                dusuk, yuksek = float(i['dusuk'].replace(",", ".")), float(i['yuksek'].replace(",", "."))
+                if alis > satis:
+                    _dict_list.append((i['title'], i))
+                    compatible_ones += 1
 
-                _dict_list[i['title']] = {'title': i['title'], 'alis': i['satis'], 'satis': i['alis'],
-                                          'dusuk': i['dusuk'], 'yuksek': i['yuksek']}
-            elif isinstance(i, str):
-                # tarih
-                _dict_list[_] = i
+                else:
+                    _d = {'title': i['title'],
+                          'alis': satis,
+                          'satis': alis,
+                          'dusuk': dusuk,
+                          'yuksek': yuksek}
+                    _dict_list.append((i['title'], _d))
+                    uncompatible_ones += 1
 
+        # we're passing time value due to deal with it before
         # check step
-        for _, i in _dict_list.items():
+        for _, i in _dict_list:
             if i['alis'] > i['satis']:
-                raise SatisAlisException("Donusturmemize ragmen alis degeri satistan yuksek cikiyor !")
+                pass
+                # raise SatisAlisException("Donusturmemize ragmen alis degeri satistan yuksek cikiyor !")
 
-        return _dict_list
+        # old style
+        data = dict(_dict_list)
+        return data
 
     def runforme(self):
         decoded_data = self.istek_yap()
-        decoded_data_backup = decoded_data
-
-        # ozbey fiyat check
-        decoded_data = self.check_replace_ozbey_alis_satis(decoded_data)
 
         # tarih ayari
         tarih = datetime.datetime.strptime(decoded_data[self.tarih_field], self.tarih_format)
         self.set_tarih(tarih)
+
+        # ozbey fiyat check
+        decoded_data = self.check_replace_ozbey_alis_satis(decoded_data)
 
         # Para Birimi ayari
         if self.get_para_birimleri_all_liste() is None:
@@ -171,9 +187,6 @@ class MoneyData:
 
         # makas
         data = self.makas_processing(data)
-
-        # fixing date
-        data.pop(-1)
 
         # ordering money
         data = self.order_money(data)
@@ -192,7 +205,8 @@ class MoneyData:
         data_with_confs = [i for i in data if i['title'] in order_list]
         data_without_confs = [i for i in data if i['title'] not in order_list]
 
-        data_with_confs.sort(key=lambda x: order_list.index(x['title']) if x['title'] in order_list else data.index(x['title']))
+        data_with_confs.sort(
+            key=lambda x: order_list.index(x['title']) if x['title'] in order_list else data.index(x['title']))
 
         return data_with_confs + data_without_confs
 
@@ -245,25 +259,25 @@ class MoneyData:
 
     def makas_processing(self, data):
         for d in data:
-            if isinstance(d, dict):
-                # alis - azalis
-                # satis + artis
-                # mantik: ucuz olani eksi, pahali olani arti
-                alis_value = d[self.static_titles['alis']]
-                if str(alis_value).count(','):
-                    alis_value = alis_value.replace(',', '.')
+            # if isinstance(d, dict):
+            # alis - azalis
+            # satis + artis
+            # mantik: ucuz olani eksi, pahali olani arti
+            alis_value = d[self.static_titles['alis']]
+            if str(alis_value).count(','):
+                alis_value = alis_value.replace(',', '.')
 
-                alis_value = float(alis_value) - float(self.get_makas_value(d[self.static_titles['title']], 'azalis'))
+            alis_value = float(alis_value) - float(self.get_makas_value(d[self.static_titles['title']], 'azalis'))
 
-                # satis
-                satis_value = d[self.static_titles['satis']]
-                if str(satis_value).count(','):
-                    satis_value = satis_value.replace(',', '.')
+            # satis
+            satis_value = d[self.static_titles['satis']]
+            if str(satis_value).count(','):
+                satis_value = satis_value.replace(',', '.')
 
-                satis_value = float(satis_value) + float(self.get_makas_value(d[self.static_titles['title']], 'artis'))
+            satis_value = float(satis_value) + float(self.get_makas_value(d[self.static_titles['title']], 'artis'))
 
-                d[self.static_titles['alis']] = alis_value
-                d[self.static_titles['satis']] = satis_value
+            d[self.static_titles['alis']] = alis_value
+            d[self.static_titles['satis']] = satis_value
 
         return data
 
