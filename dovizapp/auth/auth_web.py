@@ -51,7 +51,8 @@ class AuthPhone:
     def _create_send_msg(cls, phone_number):
         sifre = cls.get_sifre(phone_number)[0]
         msg = f"<sms><kno>1007268</kno><kulad>905323028251</kulad><sifre>568SYR</sifre><tur>Normal</tur><gonderen>" \
-            f"AVIMAYDNLTM</gonderen><mesaj>Sizin kodunuz: {sifre}</mesaj><numaralar>{phone_number}</numaralar>" \
-            f"<zaman>2020-01-14 10:56:00</zaman><zamanasimi>2020-01-14 11:56:00</zamanasimi></sms>"
+              f"AVIMAYDNLTM</gonderen><mesaj>GUNES DOVIZ PANEL GIRIS SIFRENIZ : {sifre}</mesaj><numaralar>" \
+              f"{phone_number}</numaralar>" \
+              f"<zaman>2020-01-14 10:56:00</zaman><zamanasimi>2020-01-14 11:56:00</zamanasimi></sms>"
 
         return msg

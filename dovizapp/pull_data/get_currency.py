@@ -127,8 +127,31 @@ class MoneyData:
     def set_tarih(self, value):
         self.tarih = value
 
+    @staticmethod
+    def check_replace_ozbey_alis_satis(data):
+        _dict_list = {}
+        for _, i in data.items():
+            if isinstance(i, dict):
+
+                _dict_list[i['title']] = {'title': i['title'], 'alis': i['satis'], 'satis': i['alis'],
+                                          'dusuk': i['dusuk'], 'yuksek': i['yuksek']}
+            elif isinstance(i, str):
+                # tarih
+                _dict_list[_] = i
+
+        # check step
+        for _, i in _dict_list.items():
+            if i['alis'] > i['satis']:
+                raise SatisAlisException("Donusturmemize ragmen alis degeri satistan yuksek cikiyor !")
+
+        return _dict_list
+
     def runforme(self):
         decoded_data = self.istek_yap()
+        decoded_data_backup = decoded_data
+
+        # ozbey fiyat check
+        decoded_data = self.check_replace_ozbey_alis_satis(decoded_data)
 
         # tarih ayari
         tarih = datetime.datetime.strptime(decoded_data[self.tarih_field], self.tarih_format)
@@ -309,3 +332,9 @@ class MoneyData:
     def load_from_pickled(cls, pickled_object):
         cls.makasvalues = pickled_object['makasvalues']
         print("doviz makas degerleri son oturumdan yuklendi")
+
+
+class SatisAlisException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)

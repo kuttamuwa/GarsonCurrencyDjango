@@ -1,16 +1,15 @@
 import random
 
-from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 
 from dovizapp.auth.auth_web import AuthPhone
 from dovizapp.auth.django_login_forms import UserPassLoginForm
-from dovizapp.forms import FormManager, CustomUserCreationForm
+from dovizapp.forms import FormManager
 from dovizapp.models import CustomUser
-from dovizapp.pull_data.get_currency import MoneyData
+from dovizapp.pull_data.get_currency import MoneyData, SatisAlisException
 from dovizapp.pull_data.get_sarrafiye import SarrafiyeInfo
 
 
@@ -63,16 +62,26 @@ def show_mobil_kurlar(request):
     Mobil uygulamanin bakacagi json dondurulen yer. Admin panelinde seçilenler dondurulur.
     :return:
     """
-    get_data = MoneyData()
-    data = get_data.runforme()
-    data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
-    data = get_data.order_money(data)
+    try:
+        get_data = MoneyData()
+        data = get_data.runforme()
+        data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
+        data = get_data.order_money(data)
 
-    # formatting currency
-    data = MoneyData.format_currency_data(data)
-    tarih = get_data.get_tarih()
+        # formatting currency
+        data = MoneyData.format_currency_data(data)
+        tarih = get_data.get_tarih()
 
-    return JsonResponse(data={'data': data, 'tarih': tarih})
+        return JsonResponse(data={'data': data, 'tarih': tarih})
+
+    except SatisAlisException as err:
+        return JsonResponse(status=404,
+                            data={'status': 'false', 'message': 'Ozbey fizik verilerinde alis satis ile ilgili'
+                                                                'bir sorun var : {}'.format(err.message)})
+
+    except Exception as err:
+        return JsonResponse(status=404, data={'status': 'false', 'message': 'Bilinmeyen bir hata tespit edildi'
+                                                                            ': {}'.format(err)})
 
 
 def show_enduser_kurlar(request):
@@ -80,17 +89,25 @@ def show_enduser_kurlar(request):
     Son kullanıcının webten bakacagi yer. Admin panelinde seçilenler dondurulur.
     :return:
     """
-    get_data = MoneyData()
-    data = get_data.runforme()
-    data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
-    data = get_data.order_money(data)
+    try:
+        get_data = MoneyData()
+        data = get_data.runforme()
+        data = [i for i in data if i.get('title') in MoneyData.get_para_birimleri_on()]
+        data = get_data.order_money(data)
 
-    tarih = get_data.get_tarih()
+        tarih = get_data.get_tarih()
 
-    # formatting currency
-    data = MoneyData.format_currency_data(data)
+        return render(request, 'show_pages/web/web_kurlar.html', {'data': data, 'tarih': tarih})
 
-    return render(request, 'show_pages/web/web_kurlar.html', {'data': data, 'tarih': tarih})
+    except SatisAlisException as err:
+
+        return HttpResponseBadRequest(status=404, data={'status': 'false',
+                                                        'message': 'Ozbey fizik verilerinde alis satis ile ilgili'
+                                                                   'bir sorun var : {}'.format(err.message)})
+
+    except Exception as err:
+        return JsonResponse(status=404, data={'status': 'false',
+                                              'message': 'Bilinmeyen bir hata tespit edildi: {}'.format(err)})
 
 
 def doviz_admin_login(request):
