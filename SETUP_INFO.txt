@@ -1,0 +1,5 @@
+service_name = dumanwebnew
+http://51.89.186.228:6080/dovizadmin
+
+ucok.umut@gmail.com
+NeDvEd1190 veya öyle bişi
